@@ -1,3 +1,15 @@
+Don't try to understand this project without understanding before posterlens.  
+The aim of this react project is to load a posterlens panorama, and create an 'Edit' mode, that allows to drag and drop the 3d objects, and the export the options.  
+Posterlens uses Panolens, and it' purely javascript. So this React project is not a typical projec with html templates, because the 'view' is the Panolens panorama, which created and accessed only by js.  
+
+Structure:      
+We create the panorama in index.html. There we import all the libraries as js scripts (not modules).
+The libraries are in /public/posterlens  
+So, React complains about THREE object not being defined. For that, we created state globalVars, initialized to vars that come from outside React. I used `eval` for that, sorry.
+
+
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
