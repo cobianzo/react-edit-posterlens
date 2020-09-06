@@ -1,11 +1,11 @@
 var data = {
-  "minAzimuthAngle": -1.9,  // right turn limit
+  "minAzimuthAngle": -1.9,
   "maxAzimuthAngle": -0.1,
-  "autoRotate": true,
+  "cameraFov": 90,
   "initialLookAt": [
-    4988.74,
-    -208.76,
-    -58.29
+    469,
+    -65,
+    160
   ],
   "worlds": [
     {
@@ -23,14 +23,19 @@ var data = {
           "type": "text-3d",
           "text": "+Because neightbour matters !! ",
           "pos": [
-            200,
-            -61.36,
-            -47.9
+            219.115,
+            -50.925,
+            -106.575
           ],
           "scale": 0.3,
           "size": 200,
           "name": "bigtext",
-          "fontFamily": 'posterlens/assets/fonts/Century_Gothic_Regular.js' 
+          "fontFamily": "posterlens/assets/fonts/Century_Gothic_Regular.js",
+          "rot": [
+            0,
+            5.165088155248259,
+            0
+          ]
         }
       ]
     }

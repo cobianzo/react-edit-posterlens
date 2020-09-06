@@ -24,13 +24,17 @@ function EditObject( p ) {
     }, [p.pl] );
 
     useEffect(() => { 
-        // bad practice, I know. This is to sync Object Data => inputs. I should use refs
+        // sync Object Data ===> inputs /  bad practice, I know.. I should use refs.
         Array.from(document.querySelectorAll('.pl-sync-input')).forEach( el => {
             const field = el.getAttribute('data-for');
             if (p.currentObjectData) {
-                const val = typeof (p.currentObjectData?.[field]) === 'undefined' ? '' : p.currentObjectData?.[field];
-                const input = el.querySelector('input');
-                if (input) input.value = val;
+                let val = typeof (p.currentObjectData?.[field]) === 'undefined' ? '' : p.currentObjectData?.[field];
+                if (field === 'posx') val = p.currentObjectData?.pos[0];
+                const input = el.querySelector('input, select, textarea');
+                if (input) {
+                    console.log('updatieng field input: '+ field, val);
+                    input.value = val;
+                }
             }
         } );
     }, [p.currentObjectData] );
@@ -44,9 +48,7 @@ function EditObject( p ) {
 
             window.selectedObj = theObj;
             window.lastSelectedObj = theObj;
-            
-            if (p.globalVars.stopAllAnimations) p.globalVars.stopAllAnimations(v);
-            
+                       
             console.log('Edit Object cLicked', window.selectedObj.name);
             
             v.OrbitControls.enabled = false;
@@ -76,7 +78,7 @@ function EditObject( p ) {
     };
 
     const handlerScaleRotateObject = function(event) {
-        // console.log(window.lastSelectedObj, event.key);
+        // we cant use the state currentObject3D, because it will not get the latest value. It will be initialzied to the time of creation og this handler
         if (!window.lastSelectedObj) return;
         if (event.ctrlKey) {
             switch (event.key) {
@@ -99,7 +101,9 @@ function EditObject( p ) {
         }
     }
     
+    
     // when the object is moved/scaled/rotated in the viewer, we need to update the data.
+    // Update from Object 3D ===> inputs
     const updateObjectDataFromObject = function( object ) {
         
         updateObjectSingleData(object.name, {
@@ -109,6 +113,8 @@ function EditObject( p ) {
         }) 
     }
 
+    // given name of object and updated fields in the way { link : "Hall" }, we update the p.currentObjectData and the worldOptions
+    // in some cases, sync the 3d model with the new data in the case of the name.
     const updateObjectSingleData = function( name, fields = {} ) { 
         console.log(`updating ${name}`, fields)
         const currentWorldOptions = p.pl.o.worlds.find( w => w.name === p.pl.viewer.panorama.name );
@@ -119,9 +125,17 @@ function EditObject( p ) {
         currentWorldOptions.hotspots[objectHotspotIndex] = objectData;
         p.setCurrentObjectData(objectData);
         p.setWorldOptions( Object.assign({}, currentWorldOptions ));
-        if (fields.name) { // now we sync the fields from data => object 3D
-            const obj = p.currentObject3D; // in this case I dont have to clone, I want the object to reference the real object in canvas 3d.
+
+        // now we sync the fields from Data ===> object 3D
+        if (!p.currentObject3D) return;
+        const obj = p.currentObject3D; // in this case I dont have to clone, I want the object to reference the real object in canvas 3d.
+        if (fields.name) { 
             obj.name = fields.name;
+            p.setCurrentObject3D(obj);
+        }
+        if (fields.pos) {
+        //    console.log('UPDAITNG POOOOR', fields.pos);
+            obj.position.set(...fields.pos);
             p.setCurrentObject3D(obj);
         }
     }
@@ -138,28 +152,15 @@ function EditObject( p ) {
         p.setCurrentObjectData(null);
     }
 
-
-    // sync edit input ==> update object data.
-    useEffect(() => { 
-        // bad practice, I know. This is to sync Object Data in Viewer => inputs value. (I should use refs)
-        Array.from(document.querySelectorAll('.pl-sync-input')).forEach( el => {
-            const field = el.getAttribute('data-for');
-            if (p.currentObjectData) {
-                const val = typeof (p.currentObjectData?.[field]) === 'undefined' ? '' : p.currentObjectData?.[field];
-                const input = el.querySelector('input');
-                if (input) input.value = val;
-            } else el.querySelector('input').value = '';
-        } );
-    }, [p.currentObjectData] );
-
     const inputCommands = [
-        { attrName: 'name', inputType: 'text', label: 'Name'},
-        { attrName: 'link', inputType: 'text', label: 'Link'},
-        { attrName: 'hoverText', inputType: 'textarea', label: 'Hovertext'},
+        { attrName: 'name', inputType: 'text', label: 'Name'  },
+        { attrName: 'link', inputType: 'select', label: 'Link', onlyActive: ['poster3d', 'poster-sprite'], options: p.pl?.viewer.scene.children.map( pano => pano.name  ) },
+        { attrName: 'animated', inputType: 'select', label: 'Animation', options: { 'none' : '', 'on hover' : 'hover', 'always' : 'always' } },
+        { attrName: 'hoverText', inputType: 'textarea', label: 'Hovertext', onlyActive: ['poster3d', 'poster-sprite']},
         { attrName: 'image', inputType: 'image', label: 'Image', callbackUpdate: (fields)=> { 
             p.currentObject3D.material.map.image.src=fields.image; 
             p.currentObject3D.material.needsUpdate = true; p.currentObject3D.material.map.needsUpdate = true;
-        } },
+        } , onlyActive: ['poster3d', 'poster-sprite']},
         { attrName: 'alpha', inputType: 'image', label: 'Alpha', callbackUpdate: (fields)=> { 
             if (fields.alpha) {
                 const loader = new p.globalVars.THREE.TextureLoader();
@@ -170,25 +171,27 @@ function EditObject( p ) {
                 material.depthTest = false;
                 material.needsUpdate = true; if (material.map) material.map.needsUpdate = true;
             }
-        } },
-        { attrName: 'text', inputType: 'text', label: 'Text', regenerateObject: true },
+        }, onlyActive: ['poster3d' ] },
+        { attrName: 'text', inputType: 'text', label: 'Text', regenerateObject: true, onlyActive: ['text-2d', 'text-3d'] },
+        { attrName: 'pos', subattribute: 0, inputType: 'range', min: -500, max: 500, label: 'Probando' },
     ];
   return (
     <div className="commands">
 
-      <form onSubmit={ () => false }>
-          
+      <div>
+
         <small> {p.currentObjectData?.name} ({p.currentObjectData?.type})</small>
         <h2 className="ml-3">{ p.currentObject3D? ' ' +p.currentObject3D.name : 'no selection' }</h2> 
         { (p.currentObjectData?.name) ?
         <button className="btn btn-danger float-right" onClick={ (e)=> { removeHotspot(p.currentObjectData.name); removeObject(p.currentObject3D);  } } >Remove</button>
         : null }
 
-            { inputCommands.map( fields => 
-                <InputCommand   inputType={fields.inputType} attrName={fields.attrName} label={fields.label} currentObjectData={p.currentObjectData} currentObject3D={p.currentObject3D} updateObjectSingleData={updateObjectSingleData} 
-                                regenerateObject={ fields.regenerateObject } removeObject={removeObject} pl={p.pl} callbackUpdate={fields.callbackUpdate} 
-                                key={fields.attrName}
+            { inputCommands.map( fields => {
+                if (fields.onlyActive && (!p.currentObjectData || !fields.onlyActive.includes(p.currentObjectData.type)) ) return null;
+                return <InputCommand  fields={fields}  currentObjectData={p.currentObjectData} currentObject3D={p.currentObject3D} updateObjectSingleData={updateObjectSingleData} 
+                                 removeObject={removeObject} pl={p.pl} key={fields.attrName}
                                 />
+                }
             ) }
 
           <br/>
@@ -213,7 +216,7 @@ function EditObject( p ) {
           <img width='100' alt="" src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Feuerwehrhaus_Zammerberg.jpg/1280px-Feuerwehrhaus_Zammerberg.jpg"></img>
           <img width='100' alt="" src="https://images.unsplash.com/photo-1428606381429-22224991fb0c"></img>
           <img width='100' alt="" src="https://images.unsplash.com/photo-1529432337323-223e988a90fb?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=666&q=80"></img>
-      </form>
+      </div>
         
   </div>
   );

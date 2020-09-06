@@ -17,7 +17,9 @@ function App( { data } ) {
     SCALE_FACTOR : 1.1,
     ROTATE_DEG : 0.1, // radians. 3.1416 is 180 deg.
     currentMouse3DPosition: [0,0,0],
-    AUTO_START_EDIT_MODE : false
+    // currentLookAt: [0,0,0],
+    // currentCameraFov: 0,
+    AUTO_START_EDIT_MODE : 1
   } );
   const [countRestarts, setCountRestarts] = useState(0);
   const [info, setInfo] = useState('');
@@ -67,22 +69,30 @@ function App( { data } ) {
             const point = intersects[i].point.clone();
             const world = v.panorama.getWorldPosition( new globalVars.THREE.Vector3() );
             point.sub( world );
-            const currentMP = [ point.x.toFixed(2)/2, point.y.toFixed(2)/2, point.z.toFixed(2)/2 ];
+            const currentMP = [ Math.round(point.x.toFixed(2)/2), Math.round(point.y.toFixed(2)/2), Math.round(point.z.toFixed(2)/2) ];
+            //const currentLookAt = getCurrentLookAt(pl);
             setEditParams( Object.assign( {}, editParams, { currentMouse3DPosition: currentMP } ) );
-            return currentMP;
+            return currentMP;        
+            
         }
         i++;
     }
   }
+  const getCurrentLookAt = function(pl){
+    let calculatedLookAt = pl.viewer.camera.getWorldDirection(new globalVars.THREE.Vector3()).multiplyScalar(500);
+    calculatedLookAt = [Math.round(calculatedLookAt.x), Math.round(calculatedLookAt.y), Math.round(calculatedLookAt.z) ];
+    return calculatedLookAt;
+  }
 
   // handlers
   const startEditMode = function( e ) {
-    if (!window.pl)  return;
+    if (!pl)  return;
     // get current wolrd:      
-    setWorldOptions(window.pl.o.worlds.find( w => w.name === window.pl.viewer.panorama.name ));
+    setWorldOptions(pl.o.worlds.find( w => w.name === pl.viewer.panorama.name ));
     setIsEditMode(true);
-    // init mousover get position
-    window.pl.viewer.renderer.domElement.addEventListener('mousemove', event => getMouse3Dposition(event, window.pl) );  
+    // init mousover get position all time
+    pl.viewer.renderer.domElement.addEventListener('mousemove', event => { getMouse3Dposition(event, window.pl); } );  
+    globalVars.stopAllAnimations(pl.viewer, true);
   }
 
   function restartViewer() {
@@ -107,7 +117,7 @@ function App( { data } ) {
     else posterlensConfig = data;
     
     // load from cache by default
-    var retrievedWorldOptions = JSON.parse( localStorage.getItem('worldOptions') ); //retrieve the object
+    var retrievedWorldOptions = JSON.parse( localStorage.getItem('worldOptions') ); //retrieve the object to load cache
     posterlensConfig = (retrievedWorldOptions?.worlds) ? retrievedWorldOptions : posterlensConfig;
     if (!posterlensConfig) {
       console.error('No data loaded. Cant initialize');
@@ -133,15 +143,33 @@ function App( { data } ) {
     <div className='wrapper' style={{ maxWidth:'1200px' }}  >
       
 
-      <div id={POSTERLENS_CONTAINER_ID} className='posterlens-container' style={ { width: '100%', height:'100%' } } ref={refContainer}>
-
-          <div id='pl_widgets-container'></div>
+      <div  id={POSTERLENS_CONTAINER_ID} className='posterlens-container'  
+            style={ { width: '100%', height:'100%' } } ref={refContainer}>
       </div>
 
       { pl? (<button className="btn btn-primary" onClick={ (e) => restartViewer() }> RESET <span className="badge">{countRestarts}</span> </button>) : null } 
       { !isEditMode? <button className="btn btn-primary" onClick={ startEditMode }>Start Edit Mode </button> : null } 
       {/* <button className="btn btn-warning" onClick={ () => localStorage.setItem('worldOptions', JSON.stringify(worldOptions))  }>Update</button> */}
+      { isEditMode? <button className="btn btn-primary" onClick={ () => { 
+                                                            window.pl.o.initialLookAt = getCurrentLookAt(window.pl); 
+                                                            window.pl.o.cameraFov = window.pl.viewer.camera.fov;
+                                                            setWorldOptions(Object.assign({},worldOptions));  // triggers the export fn to save in local storage
+                                                            setInfo('Updated'); }  }>
+                      Set Initial View
+                    </button> : null } 
+      { isEditMode? ( <label><input type="checkbox" className="form-control"
+                                    defaultChecked={ window.pl.o.autoRotate } 
+                                    onChange={ () => {
+                                                      window.pl.o.autoRotate = !window.pl.o.autoRotate;
+                                                      setWorldOptions(Object.assign({}, worldOptions));  // triggers the export fn to save in local storage
+                                                      }
+                                              } />
+                                        Auto rotate 
+                      </label>) : null }
+
+
       Mouse 3D: position: { editParams.currentMouse3DPosition? editParams.currentMouse3DPosition[0] + ', ' + editParams.currentMouse3DPosition[1] + ', ' + editParams.currentMouse3DPosition[2] : null }
+      <br/>Camera: { editParams.currentLookAt? editParams.currentLookAt[0] + ', ' + editParams.currentLookAt[1] + ', ' + editParams.currentLookAt[2] : null }
       
       <div className='info' style={ {color: 'red'} }>{ info }</div>
 
@@ -154,7 +182,7 @@ function App( { data } ) {
                               key={countRestarts} restartViewer={restartViewer} /> : null }
 
 
-        <Export worldOptions={worldOptions} pl={pl} />
+        <Export worldOptions={worldOptions} pl={pl} editParams={editParams} />
     </div>
   );
 }

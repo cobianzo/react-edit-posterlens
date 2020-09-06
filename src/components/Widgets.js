@@ -54,7 +54,7 @@ function Widgets( p ) {
         const params = {
             name:  `new_${type}_` + Math.floor(Math.random() * 10000),
             type: type,
-            pos: Object.values(v.camera.getWorldDirection(new p.globalVars.THREE.Vector3()).multiplyScalar(300)),
+            pos: Object.values(v.camera.getWorldDirection(new p.globalVars.THREE.Vector3()).multiplyScalar(300)), // this normalizes but not to unitary, but to 300 long
             image: 'https://images-na.ssl-images-amazon.com/images/I/91ovrqFkzkL._RI_SX200_.jpg',
         }
         switch (type) {
