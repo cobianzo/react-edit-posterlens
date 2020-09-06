@@ -12,36 +12,32 @@
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
+
+    <!-- All posterlens scripts and style -->
     <script src="posterlens/panolens/three.min.js"></script>
     <script src="posterlens/panolens/panolens.js"></script>
     <script src="posterlens/panolens/dragcontrols.js"></script>
     <script src="posterlens/posterlens.js"></script>
-    <script type="text/javascript" src="posterlens/posterlens-config.js"></script> 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel='stylesheet' id='posterlens-css'  href='posterlens/posterlens.css?ver=5.5' type='text/css' media='all' />
+    
+    <!-- Custom posterlens panorams setup -->
+    
 
-    <title>React App</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+    <title>Posterlens - Edit Panoramas</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
 
     
     
-
-    <div id="root"></div>
+    <!-- REACT edit app. It need to initialize the 'data' variable, with the configuration of posterlens to create the panorama -->
+    <script type="text/javascript" src="posterlens-config-edit.js"></script> 
+    <div id="edit-posterlens-react-container"></div>
     
 
-    <script>
-      
-      document.addEventListener("DOMContentLoaded", function() {
-        plElement = document.querySelector('#posterlens-container');
-        window.pl = plElement.dataset['pl'] = pl = plElement.posterlens( data );
-        
-        setTimeout(() => {
-                window.scene = pl.viewer.getScene();
-            }, 500);
-        });
-    </script>
 
   </body>
 </html>

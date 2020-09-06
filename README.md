@@ -1,11 +1,33 @@
-Don't try to understand this project without understanding before posterlens.  
+# To run this project
+===  
+download the project and run `yarn start`.  
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser. (if it doesn open by itself)
+
+# To edit this project
+===  
+Quick start:          
+- start at public/index.html
+    - It calls the plugin posterlens, which calls the plugin panolens, which is contructed using the library THREE.js  
+- then the App 'Edit' starts in `App.js`, with the main functionalities in 'EditObject.js'
+- Data structure as follows:
+    - we can update the data of the panorama by modifying an object in the viewer (drag and drop, scaling, rotating). That info is saved in state:  
+        - currentObject3D, which calls and copy that info into currentObjectData.
+    - or, we can update the data by editing the inputs in the panel. That info is saved in state:
+        - currentObjectData
+    - When we modify something , we update the `worldOptions`.
+        - worldOptions is used when exporting the configuration of the panorama, representing the state of what you see in the viewer.
+
+# Important notes  
+===  
+Don't try to understand this project without understanding before posterlens (public/posterlens/posterlens.js).  
 The aim of this react project is to load a posterlens panorama, and create an 'Edit' mode, that allows to drag and drop the 3d objects, and the export the options.  
 Posterlens uses Panolens, and it' purely javascript. So this React project is not a typical projec with html templates, because the 'view' is the Panolens panorama, which created and accessed only by js.  
 
-Structure:      
-We create the panorama in index.html. There we import all the libraries as js scripts (not modules).
+# More things for a developer  
+===  
+We create the panorama in index.html. There we import all the libraries as js scripts (not modules).  
 The libraries are in /public/posterlens  
-So, React complains about THREE object not being defined. For that, we created state globalVars, initialized to vars that come from outside React. I used `eval` for that, sorry.
+So, React complains about THREE object not being defined. For that, we created state globalVars, initialized to vars that come from outside React. I used `eval` for that, sorry.  
 
 
 
