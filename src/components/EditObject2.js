@@ -119,43 +119,8 @@ function EditObject2( p ) {
         window.pl.setObjectPos(object3D, [newPos.x, newPos.y, newPos.z]);
     }
 
-
-    const inputCommands = [
-        { attrName: 'name', inputType: 'text', label: 'Name'  },
-        { attrName: 'link', inputType: 'select', label: 'Link', onlyActive: ['poster3d', 'poster-sprite'], options: p.pl?.viewer.scene.children.map( pano => pano.name  ) },
-        { attrName: 'animated', inputType: 'select', label: 'Animation', options: { 'none' : '', 'on hover' : 'hover', 'always' : 'always' } },
-        { attrName: 'hoverText', inputType: 'textarea', label: 'Hovertext', onlyActive: ['poster3d', 'poster-sprite']},
-        { attrName: 'image', inputType: 'image', label: 'Image', callbackUpdate: (fields)=> { 
-            p.currentObject3D.material.map.image.src=fields.image; 
-            p.currentObject3D.material.needsUpdate = true; p.currentObject3D.material.map.needsUpdate = true;
-        } , onlyActive: ['poster3d', 'poster-sprite']},
-        { attrName: 'alpha', inputType: 'image', label: 'Alpha', callbackUpdate: (fields)=> { 
-            if (fields.alpha) {
-                const loader = new p.globalVars.THREE.TextureLoader();
-                const alphaMap = loader.load( fields.alpha );
-                const material = p.currentObject3D.material;
-                material.alphaMap = alphaMap;
-                material.transparent = true;
-                material.depthTest = false;
-                material.needsUpdate = true; if (material.map) material.map.needsUpdate = true;
-            }
-        }, onlyActive: ['poster3d' ] },
-        { attrName: 'text', inputType: 'text', label: 'Text', regenerateObject: true, onlyActive: ['text-2d', 'text-3d'] },
-        // { attrName: 'pos', subattribute: 0, inputType: 'range', min: -500, max: 500, label: 'pos X' },
-        // { attrName: 'pos', subattribute: 1, inputType: 'range', min: -500, max: 500, label: 'pos Y' },
-        // { attrName: 'pos', subattribute: 2, inputType: 'range', min: -500, max: 500, label: 'pos Z' },
-        // { attrName: 'alwaysLookatCamera', inputType: 'select', label: 'Always facing to the camera', onlyActive: ['text-2d', 'text-3d', 'poster3d'], options: { 'Yes' : true, 'No (you set the rotation)' : false } },
-        { attrName: 'alwaysLookatCamera', inputType: 'checkbox', label: 'Always facing to the camera', onlyActive: ['text-2d', 'text-3d', 'poster3d']},
-        { attrName: 'animatedMap', inputType: 'number', label: 'Animated map (sprite)', onlyActive: ['poster3d'], regenerateObject: true },
-        { attrName: 'animatedMapSpeed', inputType: 'range', min: 1, max: 100, label: '(speed)', onlyActive: ['poster3d'], regenerateObject: true },
-        { attrName: 'rot', subattribute: 0, inputType: 'range', min: -Math.PI, max: Math.PI, step: 0.1, label: 'rot X', onlyActive: ['text-2d', 'text-3d', 'poster3d'] },
-        { attrName: 'rot', subattribute: 1, inputType: 'range', min: -Math.PI, max: Math.PI, step: 0.1, label: 'rot Y', onlyActive: ['text-2d', 'text-3d', 'poster3d'] },
-        { attrName: 'rot', subattribute: 2, inputType: 'range', min: -Math.PI, max: Math.PI, step: 0.1, label: 'rot Z', onlyActive: ['text-2d', 'text-3d', 'poster3d'] },
-        { attrName: 'scale', inputType: 'range', min: 0.1, max: 1000, step: 1, label: 'scale' },
-        
-    ];
     
-    const panoList = {};
+    const panoList = {}; // for the `link` option
     if (p.plOptions)
     p.plOptions.worlds.forEach( world => panoList[world.name] = world.name  );
     const inputs = [
