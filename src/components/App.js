@@ -4,7 +4,6 @@ import ListObjects from './ListObjects';
 import './App.css';
 import Widgets from './Widgets';
 import ObjectInfo from './ObjectInfo';
-import Export from './Export';
 import {round2} from '../helpers';
 
 // Bootstrap 4
@@ -32,8 +31,6 @@ function App( { data } ) {
     SCALE_FACTOR : 1.01,
     ROTATE_DEG : 0.05, // radians. 3.1416 is 180 deg.
     currentMouse3DPosition: [0,0,0],
-    // currentLookAt: [0,0,0],
-    currentCameraFov: 'not set',
     AUTO_START_EDIT_MODE : 1,
   } );
   const [countRestarts, setCountRestarts] = useState(0);
@@ -44,6 +41,7 @@ function App( { data } ) {
 
   const globalVars = {
     THREE: eval('THREE'),
+    TWEEN: eval('TWEEN'),
     stopAllAnimations: eval('stopAllAnimations')
   }
 
@@ -63,7 +61,7 @@ function App( { data } ) {
     // initialize this react plugin to make that viewer interactive.
     if (window.pl)
       if (editParams.AUTO_START_EDIT_MODE) 
-        startEditMode();
+        setIsEditMode(true);
   }, [countRestarts]);
 
   //  a simple msg
@@ -80,11 +78,12 @@ function App( { data } ) {
   
   // Methods helpers
 
-  // x,y,z of mouse inside the 3d world
+  // x,y,z of mouse inside the 3d world. posterlens has this functions, but it doesnt work if I call it in onmousemove.
   const getMouse3Dposition = function(event) {
     if (!window.pl) return
     const v = window.pl.viewer;
     if (!v) { console.warn('Cant retrieve mouse pos, not viewer defined'); return; }
+
     const intersects = v.raycaster.intersectObject( v.panorama, true );
     if ( intersects.length <= 0 ) return;
     let i = 0;
@@ -94,7 +93,6 @@ function App( { data } ) {
             const world = v.panorama.getWorldPosition( new globalVars.THREE.Vector3() );
             point.sub( world );
             const currentMP = [ Math.round(point.x.toFixed(2)/2), Math.round(point.y.toFixed(2)/2), Math.round(point.z.toFixed(2)/2) ];
-            //const currentLookAt = getCurrentLookAt(pl);
             setEditParams( Object.assign( {}, editParams, { currentMouse3DPosition: currentMP } ) );
             return currentMP;        
             
@@ -102,20 +100,8 @@ function App( { data } ) {
         i++;
     }
   }
-  const getCurrentLookAt = function(pl){
-    let calculatedLookAt = window.pl.viewer.camera.getWorldDirection(new globalVars.THREE.Vector3()).multiplyScalar(500);
-    calculatedLookAt = [Math.round(calculatedLookAt.x), Math.round(calculatedLookAt.y), Math.round(calculatedLookAt.z) ];
-    return calculatedLookAt;
-  }
-  const updateCurrentFovFromViewer = function() {
-    //if (!pl) return;
-
-    const currentEditParams = Object.assign( {}, editParams );
-    currentEditParams.currentCameraFov = window.pl.viewer.camera.fov;
-    setEditParams(currentEditParams);
-  }
-
-
+  
+  
   // handlers
 
     // CALL to posTERLENS
@@ -146,20 +132,14 @@ function App( { data } ) {
       // Debug with chrome three inspector.
       window.scene = window.pl.viewer.getScene();
 
+      if (isEditMode) globalVars.stopAllAnimations(window.pl.viewer);
+
     });
   }
 
-  const startEditMode = function( e ) {
-    if (!window.pl)  return;
-    // get current wolrd:      
-    setTimeout( ()=>{
-      setIsEditMode(true);
-      updateCurrentFovFromViewer();
-      // init mousover get position all time
-      globalVars.stopAllAnimations(window.pl.viewer, true);
-    } , 0); // no need to wait until pl is ready. It works ok.
-  }
-  useEffect( () => { window.pl.viewer.editMode = isEditMode; }, [isEditMode]);
+  useEffect( () => { 
+    window.pl.viewer.editMode = isEditMode;
+  }, [isEditMode]);
   
   function restartViewer() {
     destroyViewer();
@@ -410,7 +390,7 @@ function App( { data } ) {
       { plOptions? 
         <Button className="btn-sm" onClick={ e => restartViewer() }> RESET <span className="badge">{countRestarts}</span> </Button>         : null } 
       { !isEditMode? 
-        <Button className="btn-secondary ml-5 btn-sm" onClick={ startEditMode }>Start Edit Mode</Button> : null } 
+        <Button className="btn-secondary ml-5 btn-sm" onClick={ setIsEditMode(!isEditMode) }>Start Edit Mode</Button> : null } 
       { plOptions? 
         <Button className="btn btn-danger btn-sm" onClick={ (e) => { localStorage.setItem('pl.o', null); restartViewer(); }  }>Clear cache </Button> : null }
 
@@ -420,6 +400,8 @@ function App( { data } ) {
         <Button className="btn btn-danger btn-sm" onClick={ removeCurrentObject }>Delete</Button> : null }
         { currentObject3D? 
         <Button className="btn btn-success btn-sm" onClick={ cloneCurrentObject }>Clone</Button> : null }
+
+        <Button variant="outline" onClick={ (e)=> { globalVars.stopAllAnimations(window.pl.viewer); e.target.remove() } }>Stop anim.</Button>
 
       <Row className="no-gutters" >
         <Col sm={12}>
@@ -440,9 +422,6 @@ function App( { data } ) {
       
       
       {/* <Button className="btn-warning" onClick={ () => localStorage.setItem('worldOptions', JSON.stringify(worldOptions))  }>Update</Button> */}
-          
-      <br/>Camera: { editParams.currentLookAt? editParams.currentLookAt[0] + ', ' + editParams.currentLookAt[1] + ', ' + editParams.currentLookAt[2] : null }
-      
       <div className='info' style={ {color: 'red'} }>{ info }</div>
 
       

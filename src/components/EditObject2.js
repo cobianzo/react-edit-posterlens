@@ -155,15 +155,20 @@ function EditObject2( p ) {
         
     ];
     
+    const panoList = {};
+    if (p.plOptions)
+    p.plOptions.worlds.forEach( world => panoList[world.name] = world.name  );
     const inputs = [
         [
             { option: 'image', type: 'image', label:'Img', active: [ 'pl_poster3d' ], deleteIfValue:'' },
             { option: 'alpha', type: 'image', label:'Alpha', active: [ 'pl_poster3d' ], deleteIfValue:'' },
-            { option: 'text', type: 'input', label:'Text', active: [ 'pl_text-2d', 'pl_text-2d-sprite', 'pl_text-3d'] },
+            { option: 'text', type: 'input', label:'Text', active: [ 'pl_text-2d', 'pl_text-3d'] },
             
-            { option: 'background', type: 'input', label:'bg color (#ffffff)', active: [ 'pl_text-2d', 'pl_text-2d-sprite' ] },
+            { option: 'background', type: 'input', label:'bg color (#ffffff)', active: [ 'pl_text-2d' ] },
             { option: 'alwaysLookatCamera', type: 'checkbox', label:'alwaysLookatCamera', checkedValue: () => true, uncheckedValue: () => false, active: [ 'pl_text-2d', 'pl_text-3d', 'pl_poster3d' ], deleteIfValue: true },
-            { option: 'sprite', type: 'checkbox', label:'sprite', checkedValue: () => true, uncheckedValue: () => null, active: [ 'pl_text-2d', 'pl_poster3d' ], deleteIfValue: false }
+            { option: 'sprite', type: 'checkbox', label:'sprite', checkedValue: () => true, uncheckedValue: () => null, active: [ 'pl_text-2d', 'pl_poster3d' ], deleteIfValue: false },
+            { option: 'link', type: 'select', options: panoList, label:'Go to pano', active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
+            { option: 'opacity', type: 'number', step: 0.05, label:'Opacity', active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '1' },
         ],
         [
         { option: 'animatedMap', type: 'number', label:'frames animation map', active: [ 'pl_poster3d' ], deleteIfValue: '' },
@@ -172,6 +177,7 @@ function EditObject2( p ) {
         { option: 'rotationY', type: 'number', label:'Rotate anim Y', step: 100, active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
         { option: 'rotationZ', type: 'number', label:'Rotate anim Z', step: 100, active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
         { option: 'animated', type: 'select', label:'Glow animation', options: { 'always' : 'always', 'only on hover' : 'hover' }, active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
+        { option: 'popupWhenVisible', type: 'number', step: 100, label:'Pops up when in camera', active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
         ]
     ];
     return (

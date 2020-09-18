@@ -14,8 +14,8 @@ export default function Input(p) {
         const fieldPair = { [p.input.option] : theValue };
         // special fields that need special treatment
         if ( p.input.option === 'background' && theValue === '' ) fieldPair[p.input.option] = 'transparent'; // no bg color => background: 'transparent'
-        if ( p.input.option === 'sprite' && theValue === true ) fieldPair.scale = p.currentObject3D.scale.x * 100; // if we convert into sprite we better scale or it will look tiny
-        if ( p.input.option === 'sprite' && !theValue ) fieldPair.scale = p.currentObject3D.scale.x / 100; // the other way as well.
+        if ( p.input.option === 'sprite' && theValue === true ) fieldPair.scale = p.currentObject3D.scale.x * 10; // if we convert into sprite we better scale or it will look tiny
+        if ( p.input.option === 'sprite' && !theValue ) fieldPair.scale = p.currentObject3D.scale.x / 10; // the other way as well.
         p.updateObjectSingleData( p.currentObject3D.name, fieldPair);
     }
 
@@ -60,8 +60,8 @@ export default function Input(p) {
                         </form>
             case "checkbox":
                 return <Form.Group >
-                <Form.Check type="checkbox" label={p.input.label}
-                            defaultChecked={p.getOptionsByObject3D(p.currentObject3D, p.input.option) === p.input.checkedValue()}
+                <Form.Check type="checkbox" label={p.input.label + `(${p.getOptionsByObject3D(p.currentObject3D, p.input.option)})`}
+                            defaultChecked={p.getOptionsByObject3D(p.currentObject3D, p.input.option) === p.input.checkedValue() || p.input.deleteIfValue === p.input.checkedValue() }
                                 onChange={ (e) => {
                                     const value = e.currentTarget.checked? p.input.checkedValue(p.currentObject3D) : p.input.uncheckedValue(p.currentObject3D) ;
                                     wrapperUpdateObjectSingleData(value);                                            

@@ -32,7 +32,8 @@ data = {
           ],
           "alwaysLookatCamera": true,
           "emissive": 10030990,
-          "transparent": true
+          "transparent": true,
+          "popupWhenVisible": true
         },
         {
           "name": "mujer",
@@ -76,9 +77,9 @@ data = {
           "name": "arboles",
           "type": "poster3d",
           "pos": [
-            "334.50",
-            "-66.60",
-            "-143.57"
+            "310.60",
+            "-101.54",
+            "-177.70"
           ],
           "image": "resources/natura.png",
           "rot": [
@@ -133,18 +134,19 @@ data = {
           "name": "arbol verde",
           "type": "poster3d",
           "pos": [
-            "468.12",
-            "-60.02",
-            "-160.04"
+            "103.71",
+            "-17.52",
+            "-46.09"
           ],
           "image": "resources/tree-green.png",
           "rot": [
             "0.00",
-            "5.04",
+            "5.13",
             "0.00"
           ],
-          "scale": "100.00",
-          "sprite": true
+          "scale": "21.82",
+          "sprite": true,
+          "popupWhenVisible": true
         },
         {
           "name": "sun",
@@ -152,9 +154,9 @@ data = {
           "rotationZ": 50000,
           "animated": "always",
           "pos": [
-            "241.51",
-            "188.26",
-            "-35.92"
+            "239.95",
+            "140.49",
+            "-135.52"
           ],
           "image": "resources/sun.png",
           "rot": [
@@ -162,7 +164,7 @@ data = {
             "4.80",
             "0.00"
           ],
-          "scale": "101.53",
+          "scale": "96.70",
           "alwaysLookatCamera": false,
           "sprite": true
         },
@@ -170,35 +172,37 @@ data = {
           "name": "plane",
           "type": "poster3d",
           "pos": [
-            "251.30",
-            "159.81",
-            "62.22"
+            "308.03",
+            "103.99",
+            "40.81"
           ],
           "image": "resources/plane.png",
           "rot": [
             "0.42",
-            "4.47",
+            "4.58",
             "0.60"
           ],
           "scale": "30.30",
-          "sprite": true
+          "sprite": true,
+          "popupWhenVisible": true
         },
         {
           "name": "bocadillo",
           "type": "poster3d",
           "pos": [
-            "1.77",
-            "-8.85",
-            "-43.18"
+            "-0.36",
+            "-8.29",
+            "-44.14"
           ],
           "animated": "hover",
           "image": "resources/talk.png",
           "rot": [
             "0.00",
-            "6.24",
+            "0.01",
             "0.00"
           ],
-          "scale": "0.68"
+          "scale": "0.68",
+          "popupWhenVisible": true
         },
         {
           "name": "mill stick",
@@ -230,26 +234,28 @@ data = {
           "rot": [
             "0.00",
             "5.50",
-            "1.08"
+            "0.29"
           ],
-          "scale": "2.94"
+          "scale": "2.94",
+          "popupWhenVisible": true
         },
         {
           "name": "cloned_mill spans",
           "type": "poster3d",
           "rotationZ": 10000,
           "pos": [
-            "77.99",
-            "-18.62",
-            "-121.06"
+            "78.56",
+            "-18.17",
+            "-121.95"
           ],
           "image": "resources/ mill-spans.png",
           "rot": [
             "0.00",
             "5.71",
-            "5.45"
+            "2.25"
           ],
-          "scale": "5.34"
+          "scale": "5.34",
+          "popupWhenVisible": true
         },
         {
           "name": "cloned_mill stick",
