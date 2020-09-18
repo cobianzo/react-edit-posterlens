@@ -24,7 +24,8 @@ function Export( p ) {
         if (!p.pl) return;
         const originalOptions = p.pl.o;
         // get index of panorama in options
-        const woldIndex = originalOptions.worlds.findIndex( w => w.name === p.worldOptions.name );
+        const woldIndex = originalOptions?.worlds.findIndex( w => w.name === p.worldOptions.name );
+        if (woldIndex < 0) return;
         p.pl.o.worlds[woldIndex] = p.worldOptions;
         
         var exportStr = JSON.stringify(p.pl.o, false, 2);
@@ -52,7 +53,7 @@ function Export( p ) {
       <React.Fragment>
         <b>Hotspots: {p.worldOptions?.hotspots?.map( ht => ht.name + ', ') } </b><br/>
         { p.pl? <button className="btn btn-warning" onClick={ (e) => { exportOptions('modal') }  }>Export </button> : null }
-        { p.pl? <button className="btn btn-danger" onClick={ (e) => { localStorage.setItem('worldOptions', null) }  }>Clear cache </button> : null }
+        { p.pl? <button className="btn btn-danger" onClick={ (e) => { localStorage.setItem('worldOptions', null); p.restartViewer(); }  }>Clear cache </button> : null }
         <blockquote style={{ background: 'gray', paddingLeft:'10px' }}>
             { showWorldOptionsJSON() }
         </blockquote>

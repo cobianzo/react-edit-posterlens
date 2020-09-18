@@ -3,7 +3,7 @@ import {useEffect, useState} from 'react';
 
 function Widgets( p ) {
 
-    const v = p.pl?.viewer;
+    const v = window.pl?.viewer;
     const [isWidgetsInit, setIsWidgetsInit ] = useState(false);
     const initWidgets = function() {
         if (isWidgetsInit) return;
@@ -24,24 +24,31 @@ function Widgets( p ) {
             group: 'editmode'
         });
         // Create poster buttons. One for every type.
-        Array.from([ /*'link',*/ 'poster3d', 'text-3d', 'text-2d', 'poster-sprite'] ).forEach( type => {
-            v.appendControlItem({
-                id: 'edit-controls',
-                style: {
-                    backgroundImage: 'url(posterlens/assets/widget-'+type+'.png)',
-                    float: 'left'
-                },    
-                onTap: () => { 
-                    const { newObj, objectData } = initNewObject( type );
-                    console.log('Created new obj: ', { newObj, objectData })
-                },
-                group: 'editmode'
-            });
+        Array.from([ /*'link', */
+                    'poster-sprite',
+                    'poster3d',
+                    'poster3d-sphere',
+                    'text-3d',
+                    'text-2d',
+                    'text-2d-sprite' 
+            ] ).forEach( type => {
+                v.appendControlItem({
+                    id: 'edit-controls',
+                    style: {
+                        backgroundImage: 'url(posterlens/assets/widget-'+type+'.png)',
+                        float: 'left'
+                    },    
+                    onTap: () => { 
+                        const { newObj, objectData } = initNewObject( type );
+                        console.log('Created new obj: ', { newObj, objectData })
+                    },
+                    group: 'editmode'
+                });
         })
     }
     useEffect(() => {
         console.log('Hellow from widgets');
-        if (p.pl && p.isEditMode) 
+        if (window.pl && p.isEditMode) 
             //if (!p.pl.viewer.widget) 
                 initWidgets() // TODO: if deactivate and reactivate the editmode, the widgets are created again (duplicated)
                 // we can use pl.viewer.widget.barElement.remove() when deactivated to delete the previous ones. But ideally we could avoid calling this init if they exist.
@@ -55,15 +62,26 @@ function Widgets( p ) {
             name:  `new_${type}_` + Math.floor(Math.random() * 10000),
             type: type,
             pos: Object.values(v.camera.getWorldDirection(new p.globalVars.THREE.Vector3()).multiplyScalar(300)), // this normalizes but not to unitary, but to 300 long
-            image: 'https://images-na.ssl-images-amazon.com/images/I/91ovrqFkzkL._RI_SX200_.jpg',
         }
         switch (type) {
-            case 'link': break;
+            // case 'link': break;
             case 'poster3d': 
+                params.image = 'resources/poster3.jpg';
             break;
-            case 'poster-sprite': break;
+            case 'poster3d-sphere': 
+                params.image = 'resources/poster3.jpg';
+                params.type = 'poster3d';
+                params.posterSphere = true;
+            break;
+             case 'poster-sprite': break;
+                params.sprite = true; 
             case 'text-2d': 
                 params.text = "New text"; 
+                break;
+            case 'text-2d-sprite': 
+                params.text = "New text"; 
+                params.sprite = true; 
+                params.type = 'text-2d';
                 break;
             case 'text-3d':
                 params.fontFamily = 'posterlens/assets/fonts/Century_Gothic_Regular.js';
@@ -72,19 +90,22 @@ function Widgets( p ) {
             default: break;
         }
 
-        p.pl.createNewObjectFromParams(v.panorama, params);
+        // posterlens fn
+        window.pl.createNewObjectFromParams(v.panorama, params);
 
         // update states object 3d in viewer & object params for posterlens
-        const newObj = p.pl.viewer.panorama.getObjectByName(params.name);
-        p.setCurrentObjectData(params);
+        const newObj = window.pl.viewer.panorama.getObjectByName(params.name);
         p.setCurrentObject3D(newObj);
-        const currentWorldOptions = Object.assign( {}, p.worldOptions );
-        currentWorldOptions.hotspots.push(params);
-        p.setWorldOptions(Object.assign( {}, currentWorldOptions ) );
-
-        // Case of poster infoSpot. For some reason it doesnt show at 1st instance. We need to reload the whole posterlens plugin:
-        if (type === 'poster-sprite') p.restartViewer();
-
+        // update posterlens option
+        
+        // update the option settings
+        let worldParams = p.getCurrentPanoramaParams();
+        worldParams.hotspots.push(params);
+        const newPlOptions = p.plOptionsReplaceWorldParams(worldParams);
+        p.setPlOptions(newPlOptions);
+        
+        
+        
         return { newObj, params } ;
     }
 

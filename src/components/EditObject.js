@@ -1,6 +1,10 @@
 import React, {useEffect} from 'react';
 import InputCommand from './InputCommand';
 
+import Button from 'react-bootstrap/Button';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Container from 'react-bootstrap/Container';
 
 function EditObject( p ) {
 
@@ -15,7 +19,10 @@ function EditObject( p ) {
         v.renderer.domElement.addEventListener('mousedown', (event) => { handlerPickupObject(event) });
         v.renderer.domElement.addEventListener('mousemove', function (event) {
             if (!window.selectedObj) return;
-            const newPos = p.getMouse3Dposition(event, p.pl);
+            //Object.values(v.camera.getWorldDirection(new p.globalVars.THREE.Vector3()).multiplyScalar(300)), // this normalizes but not to unitary, but to 300 long
+            let newPos = p.getMouse3Dposition(event, p.pl);
+            const v = new p.globalVars.THREE.Vector3(...newPos).normalize().multiplyScalar(window.selectedObj.distance);
+            newPos = [v.x, v.y, v.z];
             p.pl.setObjectPos(window.selectedObj, newPos);
         });
         v.renderer.domElement.addEventListener('mouseup', (event) => { handlerDropObject(event) });
@@ -28,13 +35,13 @@ function EditObject( p ) {
         Array.from(document.querySelectorAll('.pl-sync-input')).forEach( el => {
             const field = el.getAttribute('data-for');
             if (p.currentObjectData) {
+
                 let val = typeof (p.currentObjectData?.[field]) === 'undefined' ? '' : p.currentObjectData?.[field];
-                if (field === 'posx') val = p.currentObjectData?.pos[0];
+                
                 const input = el.querySelector('input, select, textarea');
-                if (input) {
-                    console.log('updatieng field input: '+ field, val);
+                if (input) 
                     input.value = val;
-                }
+                
             }
         } );
     }, [p.currentObjectData] );
@@ -42,10 +49,12 @@ function EditObject( p ) {
     const handlerPickupObject = (event) => {
         if ( !p.isEditMode ) return;
             const v = p.pl.viewer;
+            
             const intersects = v.raycaster.intersectObject( v.panorama, true );
             const theObj = intersects[0]? intersects[0].object : null ;
             if (!theObj.type?.startsWith('pl_')) return;
 
+            theObj.distance = v.camera.position.distanceTo(theObj.position);
             window.selectedObj = theObj;
             window.lastSelectedObj = theObj;
                        
@@ -55,16 +64,9 @@ function EditObject( p ) {
             window.selectedObj.originalPos = window.selectedObj.position;                
             
             p.setCurrentObject3D( window.selectedObj );
-
-            // now the datamodel in params.
-            const currentWorldOptions = p.pl.o.worlds.find( w => w.name === p.pl.viewer.panorama.name );
-            const objectHotspotIndex = currentWorldOptions.hotspots.findIndex( ht => ht.name === window.selectedObj?.name );
-            if (objectHotspotIndex < 0 ) return;
-            let objectData = currentWorldOptions.hotspots[objectHotspotIndex];
-            p.setCurrentObjectData( objectData );
-            console.log('1', window.selectedObj );
-            //window.selectedObj.removeEventListener('click', 'posterlens-handler', false); // DOESNT WORK! the event is backed up safe in obj._click
-            // I shoould try window.selectedObj._listeners.click[0]
+        
+            initCurrentObjectDataFromObject3D( window.selectedObj );
+            
     }
 
     const handlerDropObject = (event) => {  
@@ -72,7 +74,7 @@ function EditObject( p ) {
         if (!window.selectedObj.type.startsWith('pl_')) return;
         const v = p.pl.viewer;
         v.OrbitControls.enabled = true;        
-        updateObjectDataFromObject(window.selectedObj);
+        updateObjectDataFromViewer(window.selectedObj);
         window.selectedObj = null;
         // setTimeout( () => p.setCurrentObject3D(null), 100 );
     };
@@ -97,14 +99,27 @@ function EditObject( p ) {
                 if (window.lastSelectedObj.constructor.name === 'Infospot')
                     p.setInfo('Sprite object cannot be rotated'); 
             }
-            updateObjectDataFromObject(window.lastSelectedObj);
+            p.setCurrentObject3D(window.lastSelectedObj);
+            updateObjectDataFromViewer(window.lastSelectedObj);
         }
     }
     
+
+    const initCurrentObjectDataFromObject3D = (object3D = null) => {
+        if (!object3D) object3D = p.currentObject3D;
+        // now the datamodel in params.
+        const currentWorldOptions = p.pl.o.worlds.find( w => w.name === p.pl.viewer.panorama.name );
+        const objectHotspotIndex = currentWorldOptions.hotspots.findIndex( ht => ht.name === object3D?.name );
+        if (objectHotspotIndex < 0 ) return;
+        let objectData = currentWorldOptions.hotspots[objectHotspotIndex];
+        p.setCurrentObjectData( objectData );
+        //window.selectedObj.removeEventListener('click', 'posterlens-handler', false); // DOESNT WORK! the event is backed up safe in obj._click
+        // I shoould try window.selectedObj._listeners.click[0]
+    }
     
     // when the object is moved/scaled/rotated in the viewer, we need to update the data.
-    // Update from Object 3D ===> inputs
-    const updateObjectDataFromObject = function( object ) {
+    // Update from Object 3D ===> Object Data
+    const updateObjectDataFromViewer = function( object ) {
         
         updateObjectSingleData(object.name, {
             pos: Object.values(object.position),
@@ -134,8 +149,20 @@ function EditObject( p ) {
             p.setCurrentObject3D(obj);
         }
         if (fields.pos) {
-        //    console.log('UPDAITNG POOOOR', fields.pos);
             obj.position.set(...fields.pos);
+            p.setCurrentObject3D(obj);
+        }
+        if (fields.rot) {
+            obj.rotation.set(...fields.rot);
+            p.setCurrentObject3D(obj);
+        }
+        if (fields.scale) {
+            const ratio = obj.scale.y/obj.scale.x;
+            obj.scale.set(fields.scale,fields.scale * ratio ,fields.scale);
+            p.setCurrentObject3D(obj);
+        }
+        if (fields.hasOwnProperty("alwaysLookatCamera")) {
+            obj.alwaysLookatCamera = fields.alwaysLookatCamera;
             p.setCurrentObject3D(obj);
         }
     }
@@ -173,28 +200,80 @@ function EditObject( p ) {
             }
         }, onlyActive: ['poster3d' ] },
         { attrName: 'text', inputType: 'text', label: 'Text', regenerateObject: true, onlyActive: ['text-2d', 'text-3d'] },
-        { attrName: 'pos', subattribute: 0, inputType: 'range', min: -500, max: 500, label: 'Probando' },
+        // { attrName: 'pos', subattribute: 0, inputType: 'range', min: -500, max: 500, label: 'pos X' },
+        // { attrName: 'pos', subattribute: 1, inputType: 'range', min: -500, max: 500, label: 'pos Y' },
+        // { attrName: 'pos', subattribute: 2, inputType: 'range', min: -500, max: 500, label: 'pos Z' },
+        // { attrName: 'alwaysLookatCamera', inputType: 'select', label: 'Always facing to the camera', onlyActive: ['text-2d', 'text-3d', 'poster3d'], options: { 'Yes' : true, 'No (you set the rotation)' : false } },
+        { attrName: 'alwaysLookatCamera', inputType: 'checkbox', label: 'Always facing to the camera', onlyActive: ['text-2d', 'text-3d', 'poster3d']},
+        { attrName: 'animatedMap', inputType: 'number', label: 'Animated map (sprite)', onlyActive: ['poster3d'], regenerateObject: true },
+        { attrName: 'animatedMapSpeed', inputType: 'range', min: 1, max: 100, label: '(speed)', onlyActive: ['poster3d'], regenerateObject: true },
+        { attrName: 'rot', subattribute: 0, inputType: 'range', min: -Math.PI, max: Math.PI, step: 0.1, label: 'rot X', onlyActive: ['text-2d', 'text-3d', 'poster3d'] },
+        { attrName: 'rot', subattribute: 1, inputType: 'range', min: -Math.PI, max: Math.PI, step: 0.1, label: 'rot Y', onlyActive: ['text-2d', 'text-3d', 'poster3d'] },
+        { attrName: 'rot', subattribute: 2, inputType: 'range', min: -Math.PI, max: Math.PI, step: 0.1, label: 'rot Z', onlyActive: ['text-2d', 'text-3d', 'poster3d'] },
+        { attrName: 'scale', inputType: 'range', min: 0.1, max: 1000, step: 1, label: 'scale' },
+        
     ];
   return (
     <div className="commands">
 
-      <div>
+      <Container>
 
-        <small> {p.currentObjectData?.name} ({p.currentObjectData?.type})</small>
-        <h2 className="ml-3">{ p.currentObject3D? ' ' +p.currentObject3D.name : 'no selection' }</h2> 
-        { (p.currentObjectData?.name) ?
-        <button className="btn btn-danger float-right" onClick={ (e)=> { removeHotspot(p.currentObjectData.name); removeObject(p.currentObject3D);  } } >Remove</button>
-        : null }
+        <Row>
+            <small className='col-12'>(Data) {p.currentObjectData?.name} ({p.currentObjectData?.type})</small>
+            <Col xs="9">
+                <h2>{ p.currentObject3D? ' ' +p.currentObject3D.name : 'no selection' }</h2> 
+            </Col>
+            { (p.currentObjectData?.name) ?
+                 <Button variant="outline-danger" className="col-3" onClick={ (e)=> { removeHotspot(p.currentObjectData.name); removeObject(p.currentObject3D);  } } >Remove</Button>
+            : null }
 
-            { inputCommands.map( fields => {
+            { p.currentObject3D? <React.Fragment>
+                <Button variant="primary" onClick={ (e) => {
+                    const offset = 1.1;
+                    
+                    var newPos = p.currentObject3D.position.clone();
+                    newPos.x *= offset; newPos.y *= offset; newPos.z *= offset;
+                    if (p.pl.viewer.camera.position.distanceTo(newPos) > 500 ) {
+                        console.warn('we cant move that far. Its mor than 500m');
+                        return
+                    }
+                    p.pl.setObjectPos(p.currentObject3D, [newPos.x, newPos.y, newPos.z]);
+                    p.setCurrentObject3D(p.currentObject3D);
+                    
+                  }} >
+                    <span role="img" aria-label="Snowman">⬇️</span>
+                </Button>
+                <Button variant="primary" onClick={ (e) => {
+                    const offset = 1.1;
+                    
+                    var newPos = p.currentObject3D.position.clone();
+                    newPos.x /= offset; newPos.y /= offset; newPos.z /= offset;
+                    if (p.pl.viewer.camera.position.distanceTo(newPos) < 100 ) {
+                        console.warn('we cant move that close. Its less than 100m');
+                        return
+                    }
+                    p.pl.setObjectPos(p.currentObject3D, [newPos.x, newPos.y, newPos.z]);
+                    p.setCurrentObject3D(p.currentObject3D);
+                    
+                  }} >
+                    <span role="img" aria-label="Snowman">⬇️</span>
+                </Button>
+            
+            </React.Fragment>
+             : null }
+        </Row>
+
+            { p.currentObject3D? inputCommands.map( fields => {
                 if (fields.onlyActive && (!p.currentObjectData || !fields.onlyActive.includes(p.currentObjectData.type)) ) return null;
                 return <InputCommand  fields={fields}  currentObjectData={p.currentObjectData} currentObject3D={p.currentObject3D} updateObjectSingleData={updateObjectSingleData} 
-                                 removeObject={removeObject} pl={p.pl} key={fields.attrName}
+                                 removeObject={removeObject} pl={p.pl} key={fields.attrName + (fields.subattribute?? null )}
                                 />
                 }
-            ) }
+            ) : null }
 
           <br/>
+
+
           <label data-for="pos">
 
               Pos   { p.currentObject3D?.position.x } { p.currentObject3D?.position.y } { p.currentObject3D?.position.z }
@@ -216,7 +295,15 @@ function EditObject( p ) {
           <img width='100' alt="" src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Feuerwehrhaus_Zammerberg.jpg/1280px-Feuerwehrhaus_Zammerberg.jpg"></img>
           <img width='100' alt="" src="https://images.unsplash.com/photo-1428606381429-22224991fb0c"></img>
           <img width='100' alt="" src="https://images.unsplash.com/photo-1529432337323-223e988a90fb?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=666&q=80"></img>
-      </div>
+          <img width='100' alt="" src="posterlens/assets/level2.png"></img>
+          <img width='100' alt="" src="resources/mountains.png"></img>
+          <img width='100' alt="" src="resources/natura.png"></img>
+          <img width='100' alt="" src="resources/natura-mask.jpg"></img>
+          <img width='100' alt="" src="resources/arboles.png"></img>
+          <img width='100' alt="" src="resources/casita.png"></img>
+          <img width='100' alt="" src="resources/mujer.png"></img>
+          <img width='100' alt="" src="resources/mujer-animada.png"></img>
+      </Container>
         
   </div>
   );

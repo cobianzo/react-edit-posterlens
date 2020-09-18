@@ -1,10 +1,14 @@
 import React, {useState, useEffect} from 'react';
 
+import Form from 'react-bootstrap/Form';
+import FormControl from 'react-bootstrap/FormControl';
+import InputGroup from 'react-bootstrap/InputGroup';
+import _ from "lodash";
 
 function InputCommand( p ) {
 
     // p : the props obj. 
-    // @p.fields.inputType : type of command: text | range | image | textarea
+    // @p.fields.inputType : type of command: text | range | image | textarea | select
     // @p.fields.attrName : id of attr in Object Data Params. ie "name"
     // @p.fields.label : name to show in screen. ie "Poster Name"
 
@@ -93,45 +97,79 @@ function InputCommand( p ) {
         p.fields.options = p.fields.options.reduce( (obj, currVal) => { obj[currVal] = currVal; return obj }, { 'no link' : '' } );
     }
 
-    let inputJSX = null, afterInputJSX = null;
-    var InputTag = 'input';
+    let inputJSX = null, afterInputJSX = null, prepend = true, append = null;
+    var as = 'input';
+    const hasSubAtrr = typeof p.fields.subattribute !== 'undefined';
+    const name = p.fields.attrName + (hasSubAtrr? p.fields.subattribute : '') ;
     switch (p.fields.inputType) {
         case "textarea":
-            InputTag = 'textarea';
+            as = 'textarea';
             break;
         case "image": // same as input, later we add the bullet
             break;
         case "text":
+            break;    
+        case "number":
+            inputJSX = <Form.Group controlId={name}>
+                <Form.Check type={p.fields.inputType} label={p.fields.label}
+                            ref={inputRef} defaultValue={p.currentObjectData[p.fields.attrName]} 
+                                onChange={ (e) => { 
+                                    const newValues = {};
+                                    newValues[p.fields.attrName] = inputRef.current.value;
+                                    updateDataAndObjectFromData( newValues );  // 'my-object-3d-name', { pos: [133. 23.43 ] }
+                                } } />
+            </Form.Group>
+            break;
+
+        case "checkbox":
+            inputJSX = <Form.Group controlId={name}>
+                <Form.Check type={p.fields.inputType} label={p.fields.label}
+                            ref={inputRef} defaultChecked={p.currentObjectData[p.fields.attrName]} 
+                                onChange={ (e) => { 
+                                    const newValues = {};
+                                    newValues[p.fields.attrName] = inputRef.current.checked;
+                                    updateDataAndObjectFromData( newValues );  // 
+                                } } />
+            </Form.Group>
+            prepend = false; // so we dont show the prepend
             break;
         case "range":
+            as = 'range';
             // get current value from p.currentObjectData for this field.
             let currentVal = null;
-            if (p.currentObjectData) {
+            if (p.currentObjectData) { 
                 currentVal = p.currentObjectData[p.fields.attrName];
-                if (p.fields.subattribute) currentVal = currentVal[p.fields.subattribute];
+                if (hasSubAtrr && currentVal) currentVal = currentVal[p.fields.subattribute];
             }
             
-            inputJSX = <React.Fragment>
-                        <input ref={inputRef} type="range" id={p.fields.attrName} name={p.fields.attrName} min={p.fields.min} max={p.fields.max} defaultValue={currentVal}
-                                    onChange={ (e) => { 
+            inputJSX = 
+                        <Form.Control type="range" ref={inputRef} id={name} name={name} className='w-50'
+                                        min={p.fields.min} max={p.fields.max} defaultValue={currentVal} { ...(p.fields.step? { step: p.fields.step } : null) }
+                                    onChange={ _.debounce( (e) => { 
                                         // we update the currentData, and it will update also the curent Object 3D state and its position in the viewer
+                                        if (!inputRef.current) {
+                                            console.error('input Ref is not defined!');
+                                            return;
+                                        }
+                                        const inputValue = parseInt(inputRef.current.value * 100)/100;
                                         if (p.currentObjectData) {
                                             let dataAndValue = {};
-                                            if (typeof p.fields.subattribute !== 'undefined') {
+                                            if (hasSubAtrr) {
                                                 dataAndValue[p.fields.attrName] = p.currentObjectData[p.fields.attrName]; // { pos: [332,23,43] }
-                                                dataAndValue[p.fields.attrName][p.fields.subattribute] = inputRef.current.value;
-                                            } else dataAndValue[p.fields.attrName] = inputRef.current.value;
-                                            p.updateObjectSingleData(p.currentObjectData.name , dataAndValue );  // 'my-object-3d-name', { pos: [133. 23.43 ] }
+                                                dataAndValue[p.fields.attrName][p.fields.subattribute] = inputValue;
+                                            } else dataAndValue[p.fields.attrName] = inputValue;
+                                            updateDataAndObjectFromData( dataAndValue );  // 'my-object-3d-name', { pos: [133. 23.43 ] }
                                         } 
-                                        } } /> 
+                                    }, 250 ) }  /> 
 
-                                { currentVal?? null }
+            append =  <span className="current-val"> { typeof currentVal !== 'undefined'? Math.round(currentVal * 100) / 100 : null } </span>;
+                               
 
-                        </React.Fragment>
+                        
             break;
         case "select":
-            InputTag = 'select';
-            inputJSX = <select ref={inputRef} onChange={ (e) => {
+            as = 'select';
+            inputJSX = <FormControl as={as} ref={inputRef} onChange={ (e) => {
                                                             if (p.currentObjectData) {
                                                                 const updateFields = {};
                                                                 updateFields[p.fields.attrName] = inputRef.current.value; // assign the value of the input select
@@ -143,28 +181,42 @@ function InputCommand( p ) {
                                     return <option key={option} value={ p.fields.options[option] } >{ option }</option>
                                 }) : null
                             }
-                        </select>
+                        </FormControl>
             break;            
         default: // text
-            InputTag = 'input';
+            as = 'input';
             break;
     }
-    if ( ['text', 'textarea'].includes(p.fields.inputType) )
-         inputJSX = <InputTag type="text" defaultValue={ p.currentObjectData? p.currentObjectData[p.fields.attrName] : '' } placeholder={ p.fields.label } 
+    if ( ['text', 'textarea', 'image'].includes(p.fields.inputType) )
+         inputJSX = <FormControl as={as} defaultValue={ p.currentObjectData? p.currentObjectData[p.fields.attrName] : '' } placeholder={ p.fields.label } 
                                 onKeyUp={ p.keyup? p.keyup : (e) => p.currentObjectData? updateWithDelay( p.currentObjectData.name ) : false }
                                 onKeyDown={ (e) => stopDelay( p.fields.attrName ) } ref={inputRef} 
                                 />
 
     // bullet to select image after image input
     if (p.fields.inputType === 'image') {
-        afterInputJSX =  <i className="fa fa-bullseye" aria-hidden="true" onClick={ (e) => { setPickupImageMode(p.fields.attrName) } }></i>                     
+        afterInputJSX =  <InputGroup.Append onClick={ (e) => { setPickupImageMode(p.fields.attrName) } }>
+                            <InputGroup.Text>
+                                <i className="fa fa-bullseye" aria-hidden="true"></i>
+                            </InputGroup.Text>
+                        </InputGroup.Append>
     }
     
 
   return (
-    <label className={ p.fields.dontSync? '' : 'pl-sync-input' + ' form-group' } data-for={ p.fields.attrName } htmlFor={ p.fields.attrName } >
-        { p.fields.label } { inputJSX } 
-        { afterInputJSX }
+    <label className={ p.fields.dontSync? '' : 'pl-sync-input' + ' form-group' } data-for={ p.fields.attrName } { ...( p.fields.subattribute? { 'data-for-subfield' : p.fields.subattribute } : null ) } 
+            htmlFor={ p.fields.attrName } >
+        <InputGroup>
+            {prepend ? <InputGroup.Prepend> <InputGroup.Text>{ p.fields.label }</InputGroup.Text></InputGroup.Prepend> : null } 
+            { inputJSX } 
+            { afterInputJSX }
+            { append? 
+                <InputGroup.Append>
+                    <InputGroup.Text>
+                        {append}
+                    </InputGroup.Text>
+                </InputGroup.Append> : null }
+        </InputGroup>
         <span className="text-light bg-dark">{ infoAttr }</span>
     </label>
   );
