@@ -131,8 +131,10 @@ function EditObject2( p ) {
             
             { option: 'background', type: 'input', label:'bg color (#ffffff)', active: [ 'pl_text-2d' ] },
             { option: 'alwaysLookatCamera', type: 'checkbox', label:'alwaysLookatCamera', checkedValue: () => true, uncheckedValue: () => false, active: [ 'pl_text-2d', 'pl_text-3d', 'pl_poster3d' ], deleteIfValue: true },
-            { option: 'sprite', type: 'checkbox', label:'sprite', checkedValue: () => true, uncheckedValue: () => null, active: [ 'pl_text-2d', 'pl_poster3d' ], deleteIfValue: false },
+            { option: 'sprite', type: 'checkbox', label:'sprite 2D', checkedValue: () => true, uncheckedValue: () => null, active: [ 'pl_text-2d', 'pl_poster3d' ], deleteIfValue: false },
+            { option: 'posterSphere', type: 'checkbox', label:'is sphere', checkedValue: () => true, uncheckedValue: () => null, active: [ 'pl_text-2d', 'pl_poster3d' ], deleteIfValue: false },
             { option: 'link', type: 'select', options: panoList, label:'Go to pano', active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
+            { option: 'modal', type: 'input', label:'modal', active: [ 'pl_poster3d', 'pl_text-2d', 'pl_text-3d'], deleteIfValue:'' },
             { option: 'opacity', type: 'number', step: 0.05, label:'Opacity', active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '1' },
         ],
         [

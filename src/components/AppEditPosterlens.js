@@ -6,17 +6,14 @@ import ObjectInfo from './ObjectInfo';
 import {round2} from '../helpers';
 
 // Bootstrap 4
-import 'bootstrap/dist/css/bootstrap.min.css';
-import Tabs from 'react-bootstrap/Tabs';
+//import 'bootstrap/dist/css/bootstrap.min.css';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import Tab from 'react-bootstrap/Tab';
-import Form from 'react-bootstrap/Form';
-import FormControl from 'react-bootstrap/FormControl';
-import InputGroup from 'react-bootstrap/InputGroup';
-import Badge from 'react-bootstrap/Badge';
+
+import {THREE} from 'panolens-three';
+import TWEEN from '@tweenjs/tween.js'; // Wrong: TWEEN is inside panolens-three, but I cant access to it! import {TWEEN} from 'panolens-three' doesnt work.
 
 
 export default function AppEditPosterlens( { data, setAppMode } ) {
@@ -39,9 +36,9 @@ export default function AppEditPosterlens( { data, setAppMode } ) {
   var refContainerParent = createRef();
 
   const globalVars = {
-    THREE: eval('THREE'),
-    TWEEN: eval('TWEEN'),
-    stopAllAnimations: eval('stopAllAnimations')
+    THREE: THREE,
+    TWEEN: TWEEN,
+    stopAllAnimations: window.stopAllAnimations
   }
 
 
@@ -131,7 +128,7 @@ export default function AppEditPosterlens( { data, setAppMode } ) {
       // Debug with chrome three inspector.
       window.scene = window.pl.viewer.getScene();
 
-      if (isEditMode) globalVars.stopAllAnimations(window.pl.viewer);
+//      if (isEditMode) globalVars.stopAllAnimations(window.pl.viewer);
 
     });
   }

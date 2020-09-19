@@ -1,4 +1,4 @@
-data = {
+var data = {
   "cameraFov": 80,
   "worlds": [
     {
@@ -311,3 +311,5 @@ data = {
     }
   ]
 }
+
+export default data;

@@ -1,7 +1,13 @@
-# To run this project
+# To install and run this project
 ===  
-download the project and run `yarn start`.  
+> git clone git@github.com:cobianzo/react-edit-posterlens.git  
+> git submodule init  
+> git submodule update  
+> yarn start  
+
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser. (if it doesn open by itself)
+
+
 
 # To edit this project
 ===  
