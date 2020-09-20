@@ -230,7 +230,7 @@ var data = {
             "-11.88",
             "-69.32"
           ],
-          "image": "resources/ mill-spans.png",
+          "image": "resources/mill-spans.png",
           "rot": [
             "0.00",
             "5.50",
@@ -277,7 +277,7 @@ var data = {
       ]
     },
     {
-      "panorama": "resources/p2.jpg",
+      "panorama": "resources/p2-flat.jpg",
       "name": "Environment Pano",
       "innerPanorama": {
         "offset": [

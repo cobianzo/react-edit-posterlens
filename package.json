@@ -1,5 +1,5 @@
 {
-  "name": "flux-todo",
+  "name": "react-edit-posterlens",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -20,6 +20,7 @@
     "react-file-system": "^1.0.4",
     "react-native-fs": "^2.16.6",
     "react-scripts": "3.4.3",
+    "three-js": "^79.0.0",
     "write-file-p": "^1.0.8"
   },
   "scripts": {
@@ -27,9 +28,6 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
   },
   "browserslist": {
     "production": [
@@ -44,6 +42,7 @@
     ]
   },
   "devDependencies": {
-    "three-js": "^79.0.0"
+    "three-js": "^79.0.0",
+    "panolens-three": "^1.0.12"
   }
 }

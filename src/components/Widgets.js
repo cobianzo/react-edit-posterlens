@@ -1,6 +1,9 @@
 import {useEffect, useState} from 'react';
 
 
+import {THREE} from 'panolens-three';
+
+
 function Widgets( p ) {
 
     const v = window.pl?.viewer;
@@ -35,7 +38,7 @@ function Widgets( p ) {
                 v.appendControlItem({
                     id: 'edit-controls',
                     style: {
-                        backgroundImage: 'url(posterlens/assets/widget-'+type+'.png)',
+                        backgroundImage: 'url(resources/widget-'+type+'.png)',
                         float: 'left'
                     },    
                     onTap: () => { 
@@ -61,7 +64,7 @@ function Widgets( p ) {
         const params = {
             name:  `new_${type}_` + Math.floor(Math.random() * 10000),
             type: type,
-            pos: Object.values(v.camera.getWorldDirection(new p.globalVars.THREE.Vector3()).multiplyScalar(300)), // this normalizes but not to unitary, but to 300 long
+            pos: Object.values(v.camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(300)), // this normalizes but not to unitary, but to 300 long
         }
         switch (type) {
             // case 'link': break;
@@ -84,7 +87,7 @@ function Widgets( p ) {
                 params.type = 'text-2d';
                 break;
             case 'text-3d':
-                params.fontFamily = 'posterlens/assets/fonts/Century_Gothic_Regular.js';
+                params.fontFamily = 'resources/fonts/Century_Gothic_Regular.js';
                 params.text = "New text";
                 break;
             default: break;

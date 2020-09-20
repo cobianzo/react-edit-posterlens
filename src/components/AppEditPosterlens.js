@@ -12,6 +12,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
+
 import {THREE} from 'panolens-three';
 import TWEEN from '@tweenjs/tween.js'; // Wrong: TWEEN is inside panolens-three, but I cant access to it! import {TWEEN} from 'panolens-three' doesnt work.
 
@@ -86,7 +87,7 @@ export default function AppEditPosterlens( { data, setAppMode } ) {
     while ( i < intersects.length ) {
         if (intersects[i].object.name === 'invisibleWorld') {
             const point = intersects[i].point.clone();
-            const world = v.panorama.getWorldPosition( new globalVars.THREE.Vector3() );
+            const world = v.panorama.getWorldPosition( new THREE.Vector3() );
             point.sub( world );
             const currentMP = [ Math.round(point.x.toFixed(2)/2), Math.round(point.y.toFixed(2)/2), Math.round(point.z.toFixed(2)/2) ];
             setEditParams( Object.assign( {}, editParams, { currentMouse3DPosition: currentMP } ) );
@@ -118,6 +119,7 @@ export default function AppEditPosterlens( { data, setAppMode } ) {
     // CALL POSTERLENS
     window.pl = document.querySelector('#'+editParams.POSTERLENS_CONTAINER_ID).posterlens( posterlensConfig );
     setPlOptions(window.pl.o);
+    window.pl.changePano(1);
     window.pl.viewer.panorama.addEventListener('load', () => {
       // init also selected obj if it was selected before
       const lso = localStorage.getItem('lastSelectedObj.name');
@@ -128,7 +130,7 @@ export default function AppEditPosterlens( { data, setAppMode } ) {
       // Debug with chrome three inspector.
       window.scene = window.pl.viewer.getScene();
 
-//      if (isEditMode) globalVars.stopAllAnimations(window.pl.viewer);
+     if (isEditMode) globalVars.stopAllAnimations(window.pl.viewer);
 
     });
   }
@@ -392,7 +394,7 @@ export default function AppEditPosterlens( { data, setAppMode } ) {
           </div>
         </Col>
         { isEditMode? 
-                   <EditObject2 plOptions={plOptions} isEditMode={isEditMode} editParams={editParams} globalVars={globalVars} currentObject3D={currentObject3D} setCurrentObject3D={setCurrentObject3D} getMouse3Dposition={getMouse3Dposition} 
+                   <EditObject2 plOptions={plOptions} isEditMode={isEditMode} editParams={editParams} currentObject3D={currentObject3D} setCurrentObject3D={setCurrentObject3D} getMouse3Dposition={getMouse3Dposition} 
                                 singleObject3DToParams={singleObject3DToParams} setInfo={setInfo} updateObjectSingleData={updateObjectSingleData}
                                 getCurrentPanoramaParams={getCurrentPanoramaParams} selectObject={selectObject} getOptionsByObject3D={getOptionsByObject3D}  />
                 : null }
@@ -408,7 +410,7 @@ export default function AppEditPosterlens( { data, setAppMode } ) {
 
       
 
-      { isEditMode? <Widgets plOptions={plOptions} isEditMode={isEditMode} setIsEditMode={setIsEditMode} globalVars={globalVars} 
+      { isEditMode? <Widgets plOptions={plOptions} isEditMode={isEditMode} setIsEditMode={setIsEditMode}  
                               setCurrentObject3D={setCurrentObject3D} plOptions={plOptions} singleObject3DToParams={singleObject3DToParams}
                               refContainer={refContainer}
                               key={countRestarts} restartViewer={restartViewer}
