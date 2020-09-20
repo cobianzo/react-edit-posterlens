@@ -8,8 +8,6 @@ import Container from 'react-bootstrap/Container';
 import FormControl from 'react-bootstrap/FormControl';
 import InputGroup from 'react-bootstrap/InputGroup';
 
-import {THREE} from 'panolens-three';
-
 function EditObject2( p ) {
 
     const [imgPath, setImgPath] = useState('resources/');
@@ -30,7 +28,7 @@ function EditObject2( p ) {
             if (!window.selectedObj) return;
             let newPos = p.getMouse3Dposition(event, window.pl);
             if (!newPos) return;
-            const v = new THREE.Vector3(...newPos).normalize().multiplyScalar(window.selectedObj.distance);
+            const v = new window.THREE.Vector3(...newPos).normalize().multiplyScalar(window.selectedObj.distance);
             newPos = [v.x, v.y, v.z];
             window.pl.setObjectPos(window.selectedObj, newPos);
         });

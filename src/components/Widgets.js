@@ -1,9 +1,6 @@
 import {useEffect, useState} from 'react';
 
 
-import {THREE} from 'panolens-three';
-
-
 function Widgets( p ) {
 
     const v = window.pl?.viewer;
@@ -21,7 +18,7 @@ function Widgets( p ) {
             onTap: () => { 
                 var updateIsEdit = !p.isEditMode;
                 p.setIsEditMode(updateIsEdit);
-                if (updateIsEdit && typeof p.globalVars.stopAllAnimations !== 'undefined') p.globalVars.stopAllAnimations(v);  
+                if (updateIsEdit && typeof window.stopAllAnimations !== 'undefined') window.stopAllAnimations(v);  
                 // p.exportOptions('input'); // console the new
             },
             group: 'editmode'
@@ -64,7 +61,7 @@ function Widgets( p ) {
         const params = {
             name:  `new_${type}_` + Math.floor(Math.random() * 10000),
             type: type,
-            pos: Object.values(v.camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(300)), // this normalizes but not to unitary, but to 300 long
+            pos: Object.values(v.camera.getWorldDirection(new window.THREE.Vector3()).multiplyScalar(300)), // this normalizes but not to unitary, but to 300 long
         }
         switch (type) {
             // case 'link': break;

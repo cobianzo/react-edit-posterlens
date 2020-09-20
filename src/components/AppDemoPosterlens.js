@@ -37,7 +37,7 @@ function AppDemoPosterlens( { data, setAppMode } ) {
 
     return (
         <div className='container'>
-            <h1>Demo  
+            <h1 onDoubleClick={()=> setAppMode('edit')} >Demo  
                 { window.location.hash === '#edit'? 
                     <button className='btn btn-sm btn-primary' onClick={ ()=> setAppMode('edit') }>Back</button>
                     : null }

@@ -12,12 +12,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
-
-import {THREE} from 'panolens-three';
-import TWEEN from '@tweenjs/tween.js'; // Wrong: TWEEN is inside panolens-three, but I cant access to it! import {TWEEN} from 'panolens-three' doesnt work.
-
-
-export default function AppEditPosterlens( { data, setAppMode } ) {
+export default function AppEditPosterlens( { data, setAppMode, globalVars } ) {
 
   // React states and refs
   const [plOptions, setPlOptions] = useState();
@@ -36,11 +31,7 @@ export default function AppEditPosterlens( { data, setAppMode } ) {
   var refContainer = createRef();
   var refContainerParent = createRef();
 
-  const globalVars = {
-    THREE: THREE,
-    TWEEN: TWEEN,
-    stopAllAnimations: window.stopAllAnimations
-  }
+  
 
 
 
@@ -87,7 +78,7 @@ export default function AppEditPosterlens( { data, setAppMode } ) {
     while ( i < intersects.length ) {
         if (intersects[i].object.name === 'invisibleWorld') {
             const point = intersects[i].point.clone();
-            const world = v.panorama.getWorldPosition( new THREE.Vector3() );
+            const world = v.panorama.getWorldPosition( new window.THREE.Vector3() );
             point.sub( world );
             const currentMP = [ Math.round(point.x.toFixed(2)/2), Math.round(point.y.toFixed(2)/2), Math.round(point.z.toFixed(2)/2) ];
             setEditParams( Object.assign( {}, editParams, { currentMouse3DPosition: currentMP } ) );
@@ -130,7 +121,7 @@ export default function AppEditPosterlens( { data, setAppMode } ) {
       // Debug with chrome three inspector.
       window.scene = window.pl.viewer.getScene();
 
-     if (isEditMode) globalVars.stopAllAnimations(window.pl.viewer);
+     if (isEditMode) window.stopAllAnimations(window.pl.viewer);
 
     });
   }
@@ -384,7 +375,7 @@ export default function AppEditPosterlens( { data, setAppMode } ) {
         { currentObject3D? 
         <Button className="btn btn-success btn-sm" onClick={ cloneCurrentObject }>Clone</Button> : null }
 
-        <Button variant="outline-primary btn-sm" onClick={ (e)=> { globalVars.stopAllAnimations(window.pl.viewer); e.target.remove() } }>Stop anim.</Button>
+        <Button variant="outline-primary btn-sm" onClick={ (e)=> { window.stopAllAnimations(window.pl.viewer); e.target.remove() } }>Stop anim.</Button>
         <Button variant="outline-secondary btn-sm" onClick={ (e)=> setAppMode('demo') }>Demo</Button>
 
       <Row className="no-gutters" >

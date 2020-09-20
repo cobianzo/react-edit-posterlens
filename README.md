@@ -1,3 +1,10 @@
+DONDE LO DEJE:
+Tengoq construir posterlens como un commonjs module. Luego lo meto aqui como un import.
+Ese modulo tiene q incluit 'panolens-three' module para usar THREE y PANOLENS
+Aqui, hay q importar THREE tb en aquellos components que lo usen.
+Borrar globalVars
+Ver que hago con stopallanimations (exponerlo como fn de posterlens? )
+
 # To install and run this project
 ===  
 > git clone git@github.com:cobianzo/react-edit-posterlens.git  
