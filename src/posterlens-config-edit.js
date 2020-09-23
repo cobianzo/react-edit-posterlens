@@ -33,7 +33,7 @@ var data = {
           "alwaysLookatCamera": true,
           "emissive": 10030990,
           "transparent": true,
-          "popupWhenVisible": true
+          "popupWhenVisible": 1000
         },
         {
           "name": "mujer",
@@ -146,7 +146,7 @@ var data = {
           ],
           "scale": "21.82",
           "sprite": true,
-          "popupWhenVisible": true
+          "popupWhenVisible": 500
         },
         {
           "name": "sun",
@@ -184,7 +184,7 @@ var data = {
           ],
           "scale": "30.30",
           "sprite": true,
-          "popupWhenVisible": true
+          "popupWhenVisible": 200
         },
         {
           "name": "bocadillo",
@@ -202,7 +202,7 @@ var data = {
             "0.00"
           ],
           "scale": "0.68",
-          "popupWhenVisible": true
+          "popupWhenVisible": 300
         },
         {
           "name": "mill stick",
@@ -237,7 +237,7 @@ var data = {
             "0.29"
           ],
           "scale": "2.94",
-          "popupWhenVisible": true
+          "popupWhenVisible": 400
         },
         {
           "name": "cloned_mill spans",
@@ -255,7 +255,7 @@ var data = {
             "2.25"
           ],
           "scale": "5.34",
-          "popupWhenVisible": true
+          "popupWhenVisible": 600
         },
         {
           "name": "cloned_mill stick",

@@ -1,9 +1,5 @@
-DONDE LO DEJE:
-Tengoq construir posterlens como un commonjs module. Luego lo meto aqui como un import.
-Ese modulo tiene q incluit 'panolens-three' module para usar THREE y PANOLENS
-Aqui, hay q importar THREE tb en aquellos components que lo usen.
-Borrar globalVars
-Ver que hago con stopallanimations (exponerlo como fn de posterlens? )
+Brief: This is a widget that creates an UI to edit the panoramas created with posterlens (over panolens).  
+Its goal is to export the options config data object, used when we call posterlens for a virtual tour.
 
 # To install and run this project
 ===  
@@ -14,6 +10,21 @@ Ver que hago con stopallanimations (exponerlo como fn de posterlens? )
 
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser. (if it doesn open by itself)
 
+# Communication outside ===> this react app  
+===  
+from outside to this app:  
+- Using window vars
+    - window.plImgPath
+    - window.basePath
+    - window.onSavePlOptionsCallback(plOpts) <== We can use this fn to export the value of the posterlens options js object
+
+# Communication this react app ===> outside  
+=== 
+- using localStorage
+    - `pl.o` <-- THE MOST IMPORTANT: this is what we export.
+- using window vars
+    - window.pl : 
+    - window.lastSelectedObj : 
 
 
 # To edit this project
@@ -27,7 +38,7 @@ Quick start:
         - currentObject3D, which calls and copy that info into currentObjectData.
     - or, we can update the data by editing the inputs in the panel. That info is saved in state:
         - currentObjectData
-    - When we modify something , we update the `worldOptions`.
+    - When we modify something , we update the `plOptions`.
         - worldOptions is used when exporting the configuration of the panorama, representing the state of what you see in the viewer.
 
 # Important notes  

@@ -15,9 +15,9 @@ import Col from 'react-bootstrap/Col';
 export default function AppEditPosterlens( { data, setAppMode, globalVars } ) {
 
   // React states and refs
-  const [plOptions, setPlOptions] = useState();
-  const [currentObject3D, setCurrentObject3D] = useState(null);
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [plOptions, setPlOptions] = useState(); // IMPORTANT. The goal of all this app is to generate these options. With them we can call posterlens to createa  tour.
+  const [currentObject3D, setCurrentObject3D] = useState(null); // The current THREEjs selected object. Sometimes we use pl.lastSelectedObj, because there are events outside REACT that can't use the State
+  const [isEditMode, setIsEditMode] = useState(false); // In this app, it's always true
   const [editParams, setEditParams] = useState( {
     POSTERLENS_CONTAINER_ID: 'posterlens-container',
     SCALE_FACTOR : 1.01,
@@ -25,7 +25,8 @@ export default function AppEditPosterlens( { data, setAppMode, globalVars } ) {
     currentMouse3DPosition: [0,0,0],
     AUTO_START_EDIT_MODE : 1,
   } );
-  const [countRestarts, setCountRestarts] = useState(0);
+  const [appBasePath, setAppBasePath] = useState( window.basePath?? './');  // 
+  const [countRestarts, setCountRestarts] = useState(0); // not important
   const [info, setInfo] = useState('');
 
   var refContainer = createRef();
@@ -67,7 +68,7 @@ export default function AppEditPosterlens( { data, setAppMode, globalVars } ) {
   // Methods helpers
 
   // x,y,z of mouse inside the 3d world. posterlens has this functions, but it doesnt work if I call it in onmousemove.
-  const getMouse3Dposition = function(event) {
+  const reactGetMouse3Dposition = function(event) {
     if (!window.pl) return
     const v = window.pl.viewer;
     if (!v) { console.warn('Cant retrieve mouse pos, not viewer defined'); return; }
@@ -110,7 +111,6 @@ export default function AppEditPosterlens( { data, setAppMode, globalVars } ) {
     // CALL POSTERLENS
     window.pl = document.querySelector('#'+editParams.POSTERLENS_CONTAINER_ID).posterlens( posterlensConfig );
     setPlOptions(window.pl.o);
-    window.pl.changePano(1);
     window.pl.viewer.panorama.addEventListener('load', () => {
       // init also selected obj if it was selected before
       const lso = localStorage.getItem('lastSelectedObj.name');
@@ -170,10 +170,13 @@ export default function AppEditPosterlens( { data, setAppMode, globalVars } ) {
     return plOptionsReplaceWorldParams(currentWorldParams);
   }
 
+  // updates plOptions (the js object with all the config to load posterlens).
+  // updates the react state and the localstorage (it can be used outside of react)
   function syncPlOptionsAndLocalStorage(plOptions) {
     setPlOptions(plOptions);
     var exportStr = JSON.stringify(plOptions, false, 2);
     localStorage.setItem('pl.o', exportStr);
+    if (window.onSavePlOptionsCallback) window.onSavePlOptionsCallback(plOptions); // this fn is passed from outside react, and it can be useful
     return exportStr;
   }
 
@@ -357,7 +360,7 @@ export default function AppEditPosterlens( { data, setAppMode, globalVars } ) {
 
   return <React.Fragment>
     { currentObject3D? <ObjectInfo currentObject3D={currentObject3D} getCurrentPanoramaParams={getCurrentPanoramaParams} /> : null }
-    { plOptions? <ListObjects currentObject3D={currentObject3D} plOptions={plOptions} selectObject={selectObject} 
+    { plOptions? <ListObjects currentObject3D={currentObject3D} plOptions={plOptions} selectObject={selectObject} editParams={editParams}
                               setCurrentObject3D={setCurrentObject3D} getCurrentPanoramaParams={getCurrentPanoramaParams} /> : null }
     <Container className='wrapper border pt-2' style={{ maxWidth:'1200px' }}>
 
@@ -380,12 +383,12 @@ export default function AppEditPosterlens( { data, setAppMode, globalVars } ) {
 
       <Row className="no-gutters" >
         <Col sm={12}>
-          <div onMouseMove={ event => { getMouse3Dposition(event); } } ref={refContainerParent}>
+          <div onMouseMove={ event => { reactGetMouse3Dposition(event); } } ref={refContainerParent}>
            <div  id={editParams.POSTERLENS_CONTAINER_ID} className='posterlens-container' ref={refContainer}> </div>
           </div>
         </Col>
         { isEditMode? 
-                   <EditObject2 plOptions={plOptions} isEditMode={isEditMode} editParams={editParams} currentObject3D={currentObject3D} setCurrentObject3D={setCurrentObject3D} getMouse3Dposition={getMouse3Dposition} 
+                   <EditObject2 plOptions={plOptions} isEditMode={isEditMode} editParams={editParams} currentObject3D={currentObject3D} setCurrentObject3D={setCurrentObject3D} reactGetMouse3Dposition={reactGetMouse3Dposition} 
                                 singleObject3DToParams={singleObject3DToParams} setInfo={setInfo} updateObjectSingleData={updateObjectSingleData}
                                 getCurrentPanoramaParams={getCurrentPanoramaParams} selectObject={selectObject} getOptionsByObject3D={getOptionsByObject3D}  />
                 : null }

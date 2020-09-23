@@ -5,10 +5,6 @@ import AppEditPosterlens from './AppEditPosterlens';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import '../posterlens/posterlens.css';
-
-// config file (data)
-import data from '../posterlens-config-edit';
 
 export default function App() {
   
@@ -21,6 +17,7 @@ export default function App() {
 
   const [appMode, setAppMode] = useState(window.location.hash === '#edit'? 'edit' : 'demo');
   
+  var data = window.data; // defined outside react, in the html calling this app
 
 //  return "TESTING";
   return appMode === 'edit' ?  <AppEditPosterlens data={data} setAppMode={setAppMode} /> : 

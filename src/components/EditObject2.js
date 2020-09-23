@@ -1,5 +1,5 @@
 import React, {useEffect, useState, createRef} from 'react';
-// import InputCommand from './InputCommand';
+
 import InputData from './InputData';
 
 import Col from 'react-bootstrap/Col';
@@ -10,7 +10,7 @@ import InputGroup from 'react-bootstrap/InputGroup';
 
 function EditObject2( p ) {
 
-    const [imgPath, setImgPath] = useState('resources/');
+    const [imgPath, setImgPath] = useState( window.plImgPath?? 'resources/'); // imgs for 3d textures
     const refImgPathInput = createRef();
 
     // Important note. Inside a new EventListener, we can't access to updated props. The props will always have the initial value
@@ -26,7 +26,7 @@ function EditObject2( p ) {
         // --- move object 
         v.renderer.domElement.addEventListener('mousemove', function (event) {
             if (!window.selectedObj) return;
-            let newPos = p.getMouse3Dposition(event, window.pl);
+            let newPos = p.reactGetMouse3Dposition(event, window.pl);
             if (!newPos) return;
             const v = new window.THREE.Vector3(...newPos).normalize().multiplyScalar(window.selectedObj.distance);
             newPos = [v.x, v.y, v.z];
@@ -105,6 +105,7 @@ function EditObject2( p ) {
         }
     }
 
+    // move an object closer or farther from the camera.
     function z_move(object3D, direction = 'close'){
         let offset = 1.02;
         if (direction === 'close') offset = 1/offset;
@@ -120,7 +121,7 @@ function EditObject2( p ) {
     }
 
     
-    const panoList = {}; // for the `link` option
+    const panoList = {}; // for the `link` option below
     if (p.plOptions)
     p.plOptions.worlds.forEach( world => panoList[world.name] = world.name  );
     const inputs = [
@@ -144,7 +145,7 @@ function EditObject2( p ) {
         { option: 'rotationY', type: 'number', label:'Rotate anim Y', step: 100, active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
         { option: 'rotationZ', type: 'number', label:'Rotate anim Z', step: 100, active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
         { option: 'animated', type: 'select', label:'Glow animation', options: { 'always' : 'always', 'only on hover' : 'hover' }, active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
-        { option: 'popupWhenVisible', type: 'number', step: 100, label:'Pops up when in camera', active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
+        { option: 'popupWhenVisible', type: 'number', step: 10, label:'Pops up when in camera', active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
         ]
     ];
     return (

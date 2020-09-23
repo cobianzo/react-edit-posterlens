@@ -8,34 +8,21 @@ function Widgets( p ) {
     const initWidgets = function() {
         if (isWidgetsInit) return;
         setIsWidgetsInit(true);
+        if (typeof window.basePath === 'undefined') window.basePath = './';
         // Widgets
-        // Buttn to enable/disable Edit Mode: NOT IN USE
-        v.appendControlItem({
-            style: {
-                backgroundImage: 'url(https://images-na.ssl-images-amazon.com/images/I/91ovrqFkzkL._RI_SX200_.jpg)',
-                float: 'left'
-            },    
-            onTap: () => { 
-                var updateIsEdit = !p.isEditMode;
-                p.setIsEditMode(updateIsEdit);
-                if (updateIsEdit && typeof window.stopAllAnimations !== 'undefined') window.stopAllAnimations(v);  
-                // p.exportOptions('input'); // console the new
-            },
-            group: 'editmode'
-        });
         // Create poster buttons. One for every type.
         Array.from([ /*'link', */
-                    'poster-sprite',
+                    // 'poster-sprite', // type poster3d + sprite = true
                     'poster3d',
-                    'poster3d-sphere',
-                    'text-3d',
+                    'poster3d-sphere', // type poster3d + posterSphere = true
+                    'text-3d', // doesnt work
                     'text-2d',
-                    'text-2d-sprite' 
+                   // 'text-2d-sprite' // type text-2d + sprite = true 
             ] ).forEach( type => {
                 v.appendControlItem({
                     id: 'edit-controls',
                     style: {
-                        backgroundImage: 'url(resources/widget-'+type+'.png)',
+                        backgroundImage: 'url('+window.basePath+'resources/widget-'+type+'.png)',
                         float: 'left'
                     },    
                     onTap: () => { 
@@ -66,25 +53,28 @@ function Widgets( p ) {
         switch (type) {
             // case 'link': break;
             case 'poster3d': 
-                params.image = 'resources/poster3.jpg';
+                params.image = window.basePath+'resources/poster3.jpg';
             break;
             case 'poster3d-sphere': 
-                params.image = 'resources/poster3.jpg';
+                params.image = window.basePath+'resources/poster3.jpg';
                 params.type = 'poster3d';
                 params.posterSphere = true;
             break;
-             case 'poster-sprite': break;
-                params.sprite = true; 
+            //  case 'poster-sprite': 
+            //     params.type = 'poster3d';
+            //     params.sprite = true; 
+            //     break;
             case 'text-2d': 
                 params.text = "New text"; 
                 break;
-            case 'text-2d-sprite': 
-                params.text = "New text"; 
-                params.sprite = true; 
-                params.type = 'text-2d';
-                break;
-            case 'text-3d':
-                params.fontFamily = 'resources/fonts/Century_Gothic_Regular.js';
+            // case 'text-2d-sprite': 
+            //     params.type = 'text-2d';
+            //     params.sprite = true; 
+            //     params.text = "New text"; 
+            //     break;
+            case 'text-3d': // doesnt work
+                params.type = 'text-3d';
+                params.fontFamily = window.basePath+'resources/fonts/Century_Gothic_Regular.js';
                 params.text = "New text";
                 break;
             default: break;

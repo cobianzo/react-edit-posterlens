@@ -46,8 +46,10 @@ export default function ListObjects(p) {
             <br/>
             Fov: { window.pl? window.pl.viewer.camera.fov : null }
             <br/>
+            MousePos: { p.editParams.currentMouse3DPosition.join(', ') }
             <br/>
-            <i>Show if visible:</i> { init? getObjectsShowWhenVisible() : null }
+            <br/>
+            <i>panorama.objectsToPopupWhenVisible:</i> { init? getObjectsShowWhenVisible() : null }
         </Col>
     )
 }
