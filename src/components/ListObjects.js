@@ -39,17 +39,19 @@ export default function ListObjects(p) {
            <br/> { /** curiously this works, I dont need to use any State, it works ok with the pl object fn. 
                     *    It is because of the mousemove event in App.js. It makes recalculate this component aparently
                     */}
-           Camera: { window.pl? window.pl.getCameraDirection('lookatPoint').join(', ')  : null }
-           <br/>
-           Angle: { window.pl? Math.round(window.pl.getCameraDirection('rad') * 100)/100 : null }
-             rad :: { window.pl? Math.round(window.pl.getCameraDirection('deg')) : null }º
-            <br/>
-            Fov: { window.pl? window.pl.viewer.camera.fov : null }
-            <br/>
-            MousePos: { p.editParams.currentMouse3DPosition.join(', ') }
-            <br/>
-            <br/>
-            <i>panorama.objectsToPopupWhenVisible:</i> { init? getObjectsShowWhenVisible() : null }
+            { p.editParams.isExpertMode? <React.Fragment>
+                Camera: { window.pl? window.pl.getCameraDirection('lookatPoint').join(', ')  : null }
+                <br/>
+                Angle: { window.pl? Math.round(window.pl.getCameraDirection('rad') * 100)/100 : null }
+                    rad :: { window.pl? Math.round(window.pl.getCameraDirection('deg')) : null }º
+                    <br/>
+                    Fov: { window.pl? window.pl.viewer.camera.fov : null }
+                    <br/>
+                    MousePos: { p.editParams.currentMouse3DPosition.join(', ') }
+                    <br/>
+                    <br/>
+                    <i>panorama.objectsToPopupWhenVisible:</i> { init? getObjectsShowWhenVisible() : null }
+            </React.Fragment> : null }
         </Col>
     )
 }

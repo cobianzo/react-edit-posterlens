@@ -126,8 +126,8 @@ function EditObject2( p ) {
     p.plOptions.worlds.forEach( world => panoList[world.name] = world.name  );
     const inputs = [
         [
-            { option: 'image', type: 'image', label:'Img', active: [ 'pl_poster3d' ], deleteIfValue:'' },
-            { option: 'alpha', type: 'image', label:'Alpha', active: [ 'pl_poster3d' ], deleteIfValue:'' },
+            { option: 'image', type: (p.appAsWidget? 'image-pick' : 'image'), label:'Img', active: [ 'pl_poster3d' ], deleteIfValue:'' },
+            { option: 'alpha', type: (p.appAsWidget? 'image-pick' : 'image'), label:'Alpha', active: [ 'pl_poster3d' ], deleteIfValue:'' },
             { option: 'text', type: 'input', label:'Text', active: [ 'pl_text-2d', 'pl_text-3d'] },
             
             { option: 'background', type: 'input', label:'bg color (#ffffff)', active: [ 'pl_text-2d' ] },
@@ -162,13 +162,15 @@ function EditObject2( p ) {
             <FormControl as='input' defaultValue={ p.getOptionsByObject3D(p.currentObject3D, 'name') } />
             </form>
         </div> : null }
-            
+
+        { !p.appAsWidget?
         <InputGroup>
             <InputGroup.Prepend> <InputGroup.Text>imgs path</InputGroup.Text></InputGroup.Prepend>
             <FormControl as='input' defaultValue={imgPath} ref={refImgPathInput} 
                         onChange={ (e) => refImgPathInput.current? setImgPath(refImgPathInput.current.value) : null } />
             <InputGroup.Append><InputGroup.Text> {imgPath} </InputGroup.Text> </InputGroup.Append>
-        </InputGroup>
+        </InputGroup> : null }
+
         <Row>
             {
                 inputs.map( (inputsCol, col_i) => {
@@ -188,7 +190,7 @@ function EditObject2( p ) {
             }
         </Row>
         
-
+        <img width='50' src={ window.basePath+'resources/arboles.png' } />
       </Container>        
   );
 }

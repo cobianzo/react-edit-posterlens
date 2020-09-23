@@ -1,6 +1,6 @@
 import React, {useEffect, createRef} from 'react'
 
-function AppDemoPosterlens( { data, setAppMode } ) {
+function AppDemoPosterlens( { data, setAppMode, appAsWidget } ) {
     
     var refContainer = createRef();
 
@@ -38,7 +38,7 @@ function AppDemoPosterlens( { data, setAppMode } ) {
     return (
         <div className='container'>
             <h1 onDoubleClick={()=> setAppMode('edit')} >Demo  
-                { window.location.hash === '#edit'? 
+                { appAsWidget? 
                     <button className='btn btn-sm btn-primary' onClick={ ()=> setAppMode('edit') }>Back</button>
                     : null }
             </h1> 

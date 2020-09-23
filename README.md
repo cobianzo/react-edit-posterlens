@@ -1,6 +1,9 @@
 Brief: This is a widget that creates an UI to edit the panoramas created with posterlens (over panolens).  
 Its goal is to export the options config data object, used when we call posterlens for a virtual tour.
 
+TODO:       
+When selecting an object, init the value of all inputs with the Object data.
+
 # To install and run this project
 ===  
 > git clone git@github.com:cobianzo/react-edit-posterlens.git  

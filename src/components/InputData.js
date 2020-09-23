@@ -2,6 +2,7 @@ import React from 'react'
 
 import Button from 'react-bootstrap/Button';
 
+import InputImage from './InputImage';
 import { FilePicker } from 'react-file-picker'
 import FormControl from 'react-bootstrap/FormControl';
 import InputGroup from 'react-bootstrap/InputGroup';
@@ -9,6 +10,7 @@ import Form from 'react-bootstrap/Form';
 
 export default function Input(p) {
 
+    // udpated fied p.input.option with the value. Some fields have special treatment
     const wrapperUpdateObjectSingleData = function (value) {
         let theValue = value === p.input.deleteIfValue ? null : value; // with this we will remove the option from the params.
         const fieldPair = { [p.input.option] : theValue };
@@ -21,6 +23,10 @@ export default function Input(p) {
 
     const viewInput = function() {
         switch (p.input.type) {
+            case "image-pick":
+                return <InputImage input={p.input} currentObject3D={p.currentObject3D} getOptionsByObject3D={p.getOptionsByObject3D}
+                                    wrapperUpdateObjectSingleData={wrapperUpdateObjectSingleData} />
+            break;
             case "image":
                 return <InputGroup >
                     <InputGroup.Prepend> <InputGroup.Text>{p.input.label}</InputGroup.Text></InputGroup.Prepend>

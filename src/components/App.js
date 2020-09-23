@@ -8,6 +8,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function App() {
   
+  /* Retrieving possible variables from outside the App */
+  /* ------------------------ --------------------------- */
   useEffect( () => {
     console.log(`THREE and PANOLENS: ${window.PANOLENS}`,window.THREE);
     window.THREE = eval('THREE');
@@ -15,12 +17,15 @@ export default function App() {
     window.stopAllAnimations = window.stopAllAnimations;
   }, []);
 
-  const [appMode, setAppMode] = useState(window.location.hash === '#edit'? 'edit' : 'demo');
+  const isAppAsWidget       = window.appAsWidget? true : false;
+  const isEditModeDefault = window.location.hash === '#edit' || isAppAsWidget;
+  const [appAsWidget, setAppAsWidget] = useState(isAppAsWidget);
+  const [appMode, setAppMode] = useState(isEditModeDefault? 'edit' : 'demo');
   
   var data = window.data; // defined outside react, in the html calling this app
+  /* ------------------------ --------------------------- */
 
-//  return "TESTING";
-  return appMode === 'edit' ?  <AppEditPosterlens data={data} setAppMode={setAppMode} /> : 
-                               <AppDemoPosterlens data={data} setAppMode={setAppMode} />;
+  return appMode === 'edit' ?  <AppEditPosterlens data={data} setAppMode={setAppMode} appAsWidget={appAsWidget} /> : 
+                               <AppDemoPosterlens data={data} setAppMode={setAppMode} appAsWidget={appAsWidget} />;
   
 }

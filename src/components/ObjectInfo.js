@@ -26,9 +26,12 @@ export default function ObjectInfo(p) {
             <br/>
             Scale: {round2(p.currentObject3D?.scale.x)} {round2(p.currentObject3D?.scale.y)} {round2(p.currentObject3D?.scale.z)}
             
-            <br/>
-            <b>Object Info in options:</b> <br/>
-            {currentObjectOptionsJSX() }
+            {p.editParams.isExpertMode? 
+                <React.Fragment>
+                <br/>
+                <b>Object Info in options:</b> <br/>
+                {currentObjectOptionsJSX() }
+                </React.Fragment> : null }
         </div>
     )
 }

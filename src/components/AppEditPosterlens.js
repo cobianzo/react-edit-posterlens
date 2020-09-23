@@ -12,20 +12,21 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
-export default function AppEditPosterlens( { data, setAppMode, globalVars } ) {
-
+export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
+  
   // React states and refs
   const [plOptions, setPlOptions] = useState(); // IMPORTANT. The goal of all this app is to generate these options. With them we can call posterlens to createa  tour.
   const [currentObject3D, setCurrentObject3D] = useState(null); // The current THREEjs selected object. Sometimes we use pl.lastSelectedObj, because there are events outside REACT that can't use the State
   const [isEditMode, setIsEditMode] = useState(false); // In this app, it's always true
+  
   const [editParams, setEditParams] = useState( {
     POSTERLENS_CONTAINER_ID: 'posterlens-container',
     SCALE_FACTOR : 1.01,
     ROTATE_DEG : 0.05, // radians. 3.1416 is 180 deg.
     currentMouse3DPosition: [0,0,0],
     AUTO_START_EDIT_MODE : 1,
+    isExpertMode: (typeof window.expertMode !== 'undefined')? window.expertMode : true
   } );
-  const [appBasePath, setAppBasePath] = useState( window.basePath?? './');  // 
   const [countRestarts, setCountRestarts] = useState(0); // not important
   const [info, setInfo] = useState('');
 
@@ -359,7 +360,7 @@ export default function AppEditPosterlens( { data, setAppMode, globalVars } ) {
 
 
   return <React.Fragment>
-    { currentObject3D? <ObjectInfo currentObject3D={currentObject3D} getCurrentPanoramaParams={getCurrentPanoramaParams} /> : null }
+    { currentObject3D? <ObjectInfo currentObject3D={currentObject3D} getCurrentPanoramaParams={getCurrentPanoramaParams} editParams={editParams} /> : null }
     { plOptions? <ListObjects currentObject3D={currentObject3D} plOptions={plOptions} selectObject={selectObject} editParams={editParams}
                               setCurrentObject3D={setCurrentObject3D} getCurrentPanoramaParams={getCurrentPanoramaParams} /> : null }
     <Container className='wrapper border pt-2' style={{ maxWidth:'1200px' }}>
@@ -378,8 +379,7 @@ export default function AppEditPosterlens( { data, setAppMode, globalVars } ) {
         { currentObject3D? 
         <Button className="btn btn-success btn-sm" onClick={ cloneCurrentObject }>Clone</Button> : null }
 
-        <Button variant="outline-primary btn-sm" onClick={ (e)=> { window.stopAllAnimations(window.pl.viewer); e.target.remove() } }>Stop anim.</Button>
-        <Button variant="outline-secondary btn-sm" onClick={ (e)=> setAppMode('demo') }>Demo</Button>
+        <Button variant="outline-secondary btn-sm ml-3" onClick={ (e)=> setAppMode('demo') }>Demo</Button>
 
       <Row className="no-gutters" >
         <Col sm={12}>
@@ -390,7 +390,8 @@ export default function AppEditPosterlens( { data, setAppMode, globalVars } ) {
         { isEditMode? 
                    <EditObject2 plOptions={plOptions} isEditMode={isEditMode} editParams={editParams} currentObject3D={currentObject3D} setCurrentObject3D={setCurrentObject3D} reactGetMouse3Dposition={reactGetMouse3Dposition} 
                                 singleObject3DToParams={singleObject3DToParams} setInfo={setInfo} updateObjectSingleData={updateObjectSingleData}
-                                getCurrentPanoramaParams={getCurrentPanoramaParams} selectObject={selectObject} getOptionsByObject3D={getOptionsByObject3D}  />
+                                getCurrentPanoramaParams={getCurrentPanoramaParams} selectObject={selectObject} getOptionsByObject3D={getOptionsByObject3D}
+                                appAsWidget={appAsWidget}  />
                 : null }
       </Row>
 
@@ -407,9 +408,10 @@ export default function AppEditPosterlens( { data, setAppMode, globalVars } ) {
       { isEditMode? <Widgets plOptions={plOptions} isEditMode={isEditMode} setIsEditMode={setIsEditMode}  
                               setCurrentObject3D={setCurrentObject3D} plOptions={plOptions} singleObject3DToParams={singleObject3DToParams}
                               refContainer={refContainer}
-                              key={countRestarts} restartViewer={restartViewer}
+                              key={countRestarts} restartViewer={restartViewer} 
                               plOptionsReplaceWorldParams={plOptionsReplaceWorldParams}
                               getCurrentPanoramaParams={getCurrentPanoramaParams} setPlOptions={setPlOptions}
+                              
                               
                               /> : null }
     </Container>
