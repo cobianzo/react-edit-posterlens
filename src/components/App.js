@@ -17,7 +17,7 @@ export default function App() {
     window.stopAllAnimations = window.stopAllAnimations;
   }, []);
 
-  const isAppAsWidget       = window.appAsWidget? true : false;
+  const isAppAsWidget       = window.appAsWidget? true : false; // when we use it in Wordpress, in a page, then it's a widget app
   const isEditModeDefault = window.location.hash === '#edit' || isAppAsWidget;
   const [appAsWidget, setAppAsWidget] = useState(isAppAsWidget);
   const [appMode, setAppMode] = useState(isEditModeDefault? 'edit' : 'demo');

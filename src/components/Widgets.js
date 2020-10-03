@@ -4,6 +4,9 @@ import {useEffect, useState} from 'react';
 function Widgets( p ) {
 
     const v = window.pl?.viewer;
+    if (window.pl?.el)
+        window.pl.el.querySelector('div:last-child').classList.add('pl-widgets');
+
     const [isWidgetsInit, setIsWidgetsInit ] = useState(false);
     const initWidgets = function() {
         if (isWidgetsInit) return;
@@ -31,6 +34,10 @@ function Widgets( p ) {
                     },
                     group: 'editmode'
                 });
+                //shabby way to add a class to this btn. (panolens doesnt do it)
+                const justCreatedBtn = window.pl.el? window.pl.el.querySelector('.pl-widgets > span:last-child') : null;
+                if (justCreatedBtn) justCreatedBtn.classList.add('widget-btn-'+type);
+                
         })
     }
     useEffect(() => {
@@ -52,11 +59,11 @@ function Widgets( p ) {
         }
         switch (type) {
             // case 'link': break;
-            case 'poster3d': 
-                params.image = window.basePath+'resources/poster3.jpg';
+            case 'poster3d':    // with window.defaultPosterImg we can set up a default img on creation, from outside react.
+                params.image = window.defaultPosterImg? window.defaultPosterImg : window.basePath+'resources/poster3.jpg';
             break;
             case 'poster3d-sphere': 
-                params.image = window.basePath+'resources/poster3.jpg';
+                params.image = window.defaultPosterImg? window.defaultPosterImg : window.basePath+'resources/poster3.jpg';
                 params.type = 'poster3d';
                 params.posterSphere = true;
             break;
@@ -81,12 +88,10 @@ function Widgets( p ) {
         }
 
         // posterlens fn
+        // update states object 3d in viewer & object params for posterlens
+        params.callbackFn = mesh => p.setCurrentObject3D(mesh);        
         window.pl.createNewObjectFromParams(v.panorama, params);
 
-        // update states object 3d in viewer & object params for posterlens
-        const newObj = window.pl.viewer.panorama.getObjectByName(params.name);
-        p.setCurrentObject3D(newObj);
-        // update posterlens option
         
         // update the option settings
         let worldParams = p.getCurrentPanoramaParams();
@@ -96,7 +101,7 @@ function Widgets( p ) {
         
         
         
-        return { newObj, params } ;
+        return params;
     }
 
   // its all vanilla js, connecting with panolens. No HTML

@@ -1,6 +1,11 @@
-import React from 'react'
+import React, {useState} from 'react'
 import {round2} from '../helpers';
 export default function ObjectInfo(p) {
+
+    // State
+    const [isOpen, setIsOpen] = useState(p.editParams.isExpertMode);
+
+
     // info in a panel of the object. Gets updated when the currentObject3D updates. It means , when it's clicked for instance.
     function currentObjectOptions() {
         if (!p.currentObject3D) return;
@@ -17,21 +22,25 @@ export default function ObjectInfo(p) {
         return jsx;
     }
     return (
-        <div className='object-info position-absolute'>
+        <div className='object-info position-absolute' onClick={ () => setIsOpen(!isOpen) }>
             <h4>{p.currentObject3D?.name}<small> ({p.currentObject3D?.type})</small></h4>
-            Pos: {round2(p.currentObject3D?.position.x)} {round2(p.currentObject3D?.position.y)} {round2(p.currentObject3D?.position.z)}
-            <br/>
-            Rot: x {round2(p.currentObject3D?.rotation.x)} / y {round2(p.currentObject3D?.rotation.y)} / z {round2(p.currentObject3D?.rotation.z)}
-            { currentObjectOptions()?.alwaysLookatCamera? '(alwayslookatcamera)' : null }
-            <br/>
-            Scale: {round2(p.currentObject3D?.scale.x)} {round2(p.currentObject3D?.scale.y)} {round2(p.currentObject3D?.scale.z)}
+
+            <div className={ isOpen? 'd-block' : 'd-none' }>
+                
+                Pos: {round2(p.currentObject3D?.position.x)} {round2(p.currentObject3D?.position.y)} {round2(p.currentObject3D?.position.z)}
+                <br/>
+                Rot: x {round2(p.currentObject3D?.rotation.x)} / y {round2(p.currentObject3D?.rotation.y)} / z {round2(p.currentObject3D?.rotation.z)}
+                { currentObjectOptions()?.alwaysLookatCamera? '(alwayslookatcamera)' : null }
+                <br/>
+                Scale: {round2(p.currentObject3D?.scale.x)} {round2(p.currentObject3D?.scale.y)} {round2(p.currentObject3D?.scale.z)}
             
-            {p.editParams.isExpertMode? 
+            
                 <React.Fragment>
                 <br/>
                 <b>Object Info in options:</b> <br/>
                 {currentObjectOptionsJSX() }
-                </React.Fragment> : null }
+                </React.Fragment>
+            </div>
         </div>
     )
 }

@@ -2,20 +2,19 @@ import React, {useState, useEffect} from 'react';
 
 import Button from 'react-bootstrap/Button';
 import InputGroup from 'react-bootstrap/InputGroup';
-import _ from "lodash";
 
 function InputImage( p ) {
 
     // p : the props obj. 
-    // @p.input : 
-    // p
+    // @p.input (option, label)
 
     // Local State
     const [infoAttr, setInfoAttr] = useState(''); // a little message saying "updating", "saved" to the user
-    var inputRef = React.createRef(); // we need to access to the value of the input when it changes
-
+    
     // tool to fillup an image input by selecting an image in the screen.
     const [pickupImageMode, setPickupImageMode] = useState(false);
+
+    // watch the activation of the mode "pickup image in screen"
     useEffect(() => {
         if (! pickupImageMode) return;
         setInfoAttr('Pick up an image in the screen');
@@ -43,22 +42,12 @@ function InputImage( p ) {
         document.addEventListener("keydown", handleCancelPickupImage, 'cancelPickup' );
         
     }, [pickupImageMode]);
-
-   
-
-    const [delaysOnKeyUp, setDelaysOnKeyUp] = useState(null); // flag with the last id of the timeout of 1sec.
- 
-
-    let afterInputJSX = null, append = null;
-   
-
-    
     
 
     
 
   return (
-    <label className=' form-group'>
+    
         <InputGroup>
 
             <InputGroup.Prepend>
@@ -77,9 +66,9 @@ function InputImage( p ) {
                         {p.getOptionsByObject3D(p.currentObject3D, p.input.option)}
                     </InputGroup.Text>
                 </InputGroup.Append>
+                <span className="text-light bg-dark">{ infoAttr }</span>
         </InputGroup>
-        <span className="text-light bg-dark">{ infoAttr }</span>
-    </label>
+
   );
 }
 

@@ -1,7 +1,9 @@
 import React, {useEffect, useState, createRef} from 'react';
 
+// the <inputs ...
 import InputData from './InputData';
 
+// bootstrap 4 elements
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import Container from 'react-bootstrap/Container';
@@ -89,7 +91,7 @@ function EditObject2( p ) {
                     break;
             }
             if (event.key === 'r' || event.key === 't' || event.key === 'f' || event.key === 'g' || event.key === 'v' || event.key === 'b') {
-                if (window.lastSelectedObj.constructor.name === 'Infospot')
+                if (window.lastSelectedObj.constructor.name === 'Infospot') // deprecated
                     p.setInfo('Sprite object cannot be rotated'); 
             }
             p.setCurrentObject3D(window.lastSelectedObj);
