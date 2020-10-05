@@ -9,6 +9,7 @@ import Row from 'react-bootstrap/Row';
 import Container from 'react-bootstrap/Container';
 import FormControl from 'react-bootstrap/FormControl';
 import InputGroup from 'react-bootstrap/InputGroup';
+import Button from 'react-bootstrap/esm/Button';
 
 function EditObject2( p ) {
 
@@ -79,12 +80,12 @@ function EditObject2( p ) {
             switch (event.key) {
                 case '+': window.lastSelectedObj.scale.set( window.lastSelectedObj.scale.x * p.editParams.SCALE_FACTOR, window.lastSelectedObj.scale.y * p.editParams.SCALE_FACTOR, window.lastSelectedObj.scale.z * p.editParams.SCALE_FACTOR );      break;
                 case '-': window.lastSelectedObj.scale.set( window.lastSelectedObj.scale.x / p.editParams.SCALE_FACTOR, window.lastSelectedObj.scale.y / p.editParams.SCALE_FACTOR, window.lastSelectedObj.scale.z / p.editParams.SCALE_FACTOR );      break;
-                case 'r': window.lastSelectedObj.rotation.z += p.editParams.ROTATE_DEG;  break;
-                case 't': window.lastSelectedObj.rotation.z -= p.editParams.ROTATE_DEG;  break;
-                case 'f': window.lastSelectedObj.rotation.y += p.editParams.ROTATE_DEG;  break;
-                case 'g': window.lastSelectedObj.rotation.y -= p.editParams.ROTATE_DEG;  break;
-                case 'v': window.lastSelectedObj.rotation.x += p.editParams.ROTATE_DEG;  break;
-                case 'b': window.lastSelectedObj.rotation.x -= p.editParams.ROTATE_DEG;  break;
+                case 'r': window.lastSelectedObj.rotateZ(p.editParams.ROTATE_DEG);  break;
+                case 't': window.lastSelectedObj.rotateZ(-p.editParams.ROTATE_DEG);  break;
+                case 'f': window.lastSelectedObj.rotateY(p.editParams.ROTATE_DEG);  break;
+                case 'g': window.lastSelectedObj.rotateY(-p.editParams.ROTATE_DEG);  break;
+                case 'v': window.lastSelectedObj.rotateX(p.editParams.ROTATE_DEG);  break;
+                case 'b': window.lastSelectedObj.rotateX(-p.editParams.ROTATE_DEG);  break;
                 case '4': z_move(window.lastSelectedObj, 'close'); break;
                 case '5': z_move(window.lastSelectedObj, 'far'); break;
                 default:
@@ -131,8 +132,10 @@ function EditObject2( p ) {
             { option: 'image', type: (p.appAsWidget? 'image-pick' : 'image'), label:'Img', active: [ 'pl_poster3d' ], deleteIfValue:'' },
             { option: 'alpha', type: (p.appAsWidget? 'image-pick' : 'image'), label:'Alpha', active: [ 'pl_poster3d' ], deleteIfValue:'' },
             { option: 'text', type: 'input', label:'Text', active: [ 'pl_text-2d', 'pl_text-3d'] },
-            
-            { option: 'background', type: 'input', label:'bg color (#ffffff)', active: [ 'pl_text-2d' ] },
+            { option: 'emissive', type: 'color', label:'Emissive Color', active: [ 'pl_text-3d'] },
+            { option: 'color', type: 'color', label:'Text Color', active: [ 'pl_text-2d'], deleteIfValue:'#ffffff' },
+            { option: 'background', type: 'color', label:'Background', active: [ 'pl_text-2d'], deleteIfValue:'#000000' },
+            // TODO: we need to give an option for bg transparent 
             { option: 'alwaysLookatCamera', type: 'checkbox', label:'alwaysLookatCamera', checkedValue: () => true, uncheckedValue: () => false, active: [ 'pl_text-2d', 'pl_text-3d', 'pl_poster3d' ], deleteIfValue: true },
             { option: 'sprite', type: 'checkbox', label:'sprite 2D', checkedValue: () => true, uncheckedValue: () => null, active: [ 'pl_text-2d', 'pl_poster3d' ], deleteIfValue: false },
             { option: 'posterSphere', type: 'checkbox', label:'is sphere', checkedValue: () => true, uncheckedValue: () => null, active: [ 'pl_text-2d', 'pl_poster3d' ], deleteIfValue: false },
@@ -151,20 +154,27 @@ function EditObject2( p ) {
         ]
     ];
     return (
-      <Container>
+      <Container className="edit-panel">
+        { /* The name of the object */}
         {p.currentObject3D? 
-        <div className="position-absolute" style={{ marginTop: '-30px'}}>
-            <span role="img" aria-label='c'>⬆️</span>
-            { p.getOptionsByObject3D(p.currentObject3D, 'name') } <small>{p.getOptionsByObject3D(p.currentObject3D, 'type')}</small>
-            <form className='float-left' onSubmit={ (e)=> { 
-                e.preventDefault();
-                const value = e.currentTarget.querySelector('input').value;
-                p.updateObjectSingleData( p.currentObject3D.name, { name: value} );
-                }}>
-            <FormControl as='input' defaultValue={ p.getOptionsByObject3D(p.currentObject3D, 'name') } />
-            </form>
-        </div> : null }
+        <Row>
+            <InputData   input={ { option: 'name', type: 'input', label:'NAME', active: [ 'pl_poster3d', 'pl_text-2d', 'pl_text-3d'] } } 
+                            imgPath={imgPath}
+                            updateObjectSingleData={p.updateObjectSingleData} 
+                            currentObject3D={p.currentObject3D}
+                            getOptionsByObject3D={p.getOptionsByObject3D} />
+        </Row> : null }
 
+        <Button variant="primary" className='float-right' onClick={ (e)=> {                 
+            const currentPanoParams =  p.getCurrentPanoramaParams();
+            currentPanoParams.initialLookAt = window.pl.getCameraDirection('lookatPoint');
+            currentPanoParams.initialFov = window.pl.viewer.camera.fov;
+            const newOptions = p.plOptionsReplaceWorldParams(currentPanoParams);
+            p.syncPlOptionsAndLocalStorage(newOptions);
+         } }>Set camera view</Button>
+        
+
+        { /* The imgs path (not needed anymore) */}
         { !p.appAsWidget?
         <InputGroup>
             <InputGroup.Prepend> <InputGroup.Text>imgs path</InputGroup.Text></InputGroup.Prepend>

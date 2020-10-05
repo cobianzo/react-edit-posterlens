@@ -3,6 +3,7 @@ import EditObject2 from './EditObject2';
 import ListObjects from './ListObjects';
 import Widgets from './Widgets';
 import ObjectInfo from './ObjectInfo';
+import PanoInfo from './PanoInfo';
 import {round2} from '../helpers';
 
 // Bootstrap 4
@@ -63,6 +64,25 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
     if (!currentObject3D) return;
     
     localStorage.setItem('lastSelectedObj.name', currentObject3D.name);
+    
+    // Object 3D ====> Inputs
+    const options = getOptionsByObject3D(currentObject3D);
+    const formsSync = document.querySelectorAll('[sync-3d]');
+    formsSync.forEach( formEl => {
+      const option = formEl.getAttribute('sync-3d');
+      let value = (typeof options[option] !== 'undefined' )? options[option] : '';
+      let inputDefault = formEl.getAttribute('sync-default'); // string "true" or "false"
+      inputDefault = typeof inputDefault === 'undefined' || inputDefault === 'false' ? '' : inputDefault;
+      if (value === '' && inputDefault) value = inputDefault;
+       
+      if (formEl.querySelector('input'))
+        formEl.querySelector('input').value = value;
+      if (formEl.querySelector('select'))
+        formEl.querySelector('select').value = value;
+      if (formEl.querySelector('input[type="checkbox"]'))
+        formEl.querySelector('input[type="checkbox"]').checked = value? true : false ;
+    })
+
     // currentObject3D.material.blending = 2;
   }, [currentObject3D])
   
@@ -149,6 +169,7 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
     return objectData;
   }
   function getCurrentPanoramaParams() {
+    if (!plOptions) return null;
     return plOptions.worlds.find( w => w.name === window.pl.viewer.panorama.name );
   }
   function getCurrentPanoramaParamsIndex() {
@@ -172,7 +193,7 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
   }
 
   // updates plOptions (the js object with all the config to load posterlens).
-  // updates the react state and the localstorage (it can be used outside of react)
+  // updates the react state and the localstorage (it can be used outside of react). It also uses a callback that can be used outside react.
   function syncPlOptionsAndLocalStorage(plOptions) {
     setPlOptions(plOptions);
     var exportStr = JSON.stringify(plOptions, false, 2);
@@ -360,7 +381,10 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
 
 
   return <React.Fragment>
-    { currentObject3D? <ObjectInfo currentObject3D={currentObject3D} getCurrentPanoramaParams={getCurrentPanoramaParams} editParams={editParams} /> : null }
+    { currentObject3D? 
+        <ObjectInfo currentObject3D={currentObject3D} getCurrentPanoramaParams={getCurrentPanoramaParams} editParams={editParams} /> : 
+        <PanoInfo currentObject3D={currentObject3D} getCurrentPanoramaParams={getCurrentPanoramaParams} editParams={editParams} /> 
+    }
     { plOptions? <ListObjects currentObject3D={currentObject3D} plOptions={plOptions} selectObject={selectObject} editParams={editParams}
                               setCurrentObject3D={setCurrentObject3D} getCurrentPanoramaParams={getCurrentPanoramaParams} /> : null }
     <Container className='wrapper border pt-2' style={{ maxWidth:'1200px' }}>
@@ -379,6 +403,9 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
         { currentObject3D? 
         <Button className="btn btn-success btn-sm" onClick={ cloneCurrentObject }>Clone</Button> : null }
 
+        { currentObject3D? 
+        <Button className="btn btn-warning btn-sm" onClick={ ()=> { setCurrentObject3D(null); window.lastSelectedObj = null; } }>Unselect</Button> : null }
+
         <Button variant="outline-secondary btn-sm ml-3" onClick={ (e)=> setAppMode('demo') }>Demo</Button>
 
       <Row className="no-gutters" >
@@ -391,7 +418,7 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
                    <EditObject2 plOptions={plOptions} isEditMode={isEditMode} editParams={editParams} currentObject3D={currentObject3D} setCurrentObject3D={setCurrentObject3D} reactGetMouse3Dposition={reactGetMouse3Dposition} 
                                 singleObject3DToParams={singleObject3DToParams} setInfo={setInfo} updateObjectSingleData={updateObjectSingleData}
                                 getCurrentPanoramaParams={getCurrentPanoramaParams} selectObject={selectObject} getOptionsByObject3D={getOptionsByObject3D}
-                                appAsWidget={appAsWidget}  />
+                                appAsWidget={appAsWidget} plOptionsReplaceWorldParams={plOptionsReplaceWorldParams} syncPlOptionsAndLocalStorage={syncPlOptionsAndLocalStorage} />
                 : null }
       </Row>
 

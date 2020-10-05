@@ -1,5 +1,6 @@
 import React, {useState} from 'react'
 import {round2} from '../helpers';
+
 export default function ObjectInfo(p) {
 
     // State
@@ -13,6 +14,7 @@ export default function ObjectInfo(p) {
         let objectOptions = worldParams.hotspots.find( ht => ht.name === p.currentObject3D?.name );
         return objectOptions;
     }
+    // transform the info in JSX to render it as text.
     function currentObjectOptionsJSX() {
         const objectOptions = currentObjectOptions();
         var exportStr = objectOptions? JSON.stringify(objectOptions, false, 2) : 'no sel';
@@ -21,6 +23,8 @@ export default function ObjectInfo(p) {
         lines.forEach((line, i)=> { jsx.push(line); jsx.push(<br key={'return-'+i} />); } )
         return jsx;
     }
+
+    // THAT's it. Lets render.
     return (
         <div className='object-info position-absolute' onClick={ () => setIsOpen(!isOpen) }>
             <h4>{p.currentObject3D?.name}<small> ({p.currentObject3D?.type})</small></h4>

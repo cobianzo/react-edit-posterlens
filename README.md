@@ -6,10 +6,13 @@ When selecting an object, init the value of all inputs with the Object data.
 
 # To install and run this project
 ===  
-> git clone git@github.com:cobianzo/react-edit-posterlens.git  
+> git clone git@github.com:cobianzo/react-edit-posterlens.git 
+> cd react-edit-posterlens  
+-- I dont know why the submodules didnt work last time, but in theory:
 > git submodule init  
 > git submodule update  
-> yarn start  
+> npm i  
+> yarn start   
 
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser. (if it doesn open by itself)
 
