@@ -31,6 +31,7 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
   const [countRestarts, setCountRestarts] = useState(0); // not important
   const [info, setInfo] = useState('');
 
+  const [onClickOption, setOnClickOption] = useState(null); // used in InputOnclickOption, but needs to be defined here.
   var refContainer = createRef();
   var refContainerParent = createRef();
 
@@ -62,10 +63,10 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
 
   useEffect( () => {
     if (!currentObject3D) return;
-    
+    console.log('watch currentObject3D ----------------------')
     localStorage.setItem('lastSelectedObj.name', currentObject3D.name);
     
-    // Object 3D ====> Inputs
+    // Object 3D ====> Inputs  !SHABBY WAY!
     const options = getOptionsByObject3D(currentObject3D);
     const formsSync = document.querySelectorAll('[sync-3d]');
     formsSync.forEach( formEl => {
@@ -81,6 +82,10 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
         formEl.querySelector('select').value = value;
       if (formEl.querySelector('input[type="checkbox"]'))
         formEl.querySelector('input[type="checkbox"]').checked = value? true : false ;
+
+      if (option === 'onClickAction') { // special case. InputOnClickOption: This field handles a state that needs to be updated
+        setOnClickOption(value);
+      }
     })
 
     // currentObject3D.material.blending = 2;
@@ -389,14 +394,14 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
                               setCurrentObject3D={setCurrentObject3D} getCurrentPanoramaParams={getCurrentPanoramaParams} /> : null }
     <Container className='wrapper border pt-2' style={{ maxWidth:'1200px' }}>
 
-      { plOptions? 
+      { plOptions && editParams.isExpertMode ? 
         <Button className="btn-sm" onClick={ e => restartViewer() }> RESET <span className="badge">{countRestarts}</span> </Button>         : null } 
       { !isEditMode? 
         <Button className="btn-secondary ml-5 btn-sm" onClick={ setIsEditMode(!isEditMode) }>Start Edit Mode</Button> : null } 
-      { plOptions? 
+      { plOptions && editParams.isExpertMode ? 
         <Button className="btn btn-danger btn-sm" onClick={ (e) => { localStorage.setItem('pl.o', null); restartViewer(); }  }>Clear cache </Button> : null }
-
-        <Button className="btn-secondary ml-5 btn-sm" onClick={ () => exportToTextarea() }>Export</Button>
+      { editParams.isExpertMode ? 
+        <Button className="btn-secondary ml-5 btn-sm" onClick={ () => exportToTextarea() }>Export</Button> : null }
 
         { currentObject3D? 
         <Button className="btn btn-danger btn-sm" onClick={ removeCurrentObject }>Delete</Button> : null }
@@ -418,7 +423,8 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
                    <EditObject2 plOptions={plOptions} isEditMode={isEditMode} editParams={editParams} currentObject3D={currentObject3D} setCurrentObject3D={setCurrentObject3D} reactGetMouse3Dposition={reactGetMouse3Dposition} 
                                 singleObject3DToParams={singleObject3DToParams} setInfo={setInfo} updateObjectSingleData={updateObjectSingleData}
                                 getCurrentPanoramaParams={getCurrentPanoramaParams} selectObject={selectObject} getOptionsByObject3D={getOptionsByObject3D}
-                                appAsWidget={appAsWidget} plOptionsReplaceWorldParams={plOptionsReplaceWorldParams} syncPlOptionsAndLocalStorage={syncPlOptionsAndLocalStorage} />
+                                appAsWidget={appAsWidget} plOptionsReplaceWorldParams={plOptionsReplaceWorldParams} syncPlOptionsAndLocalStorage={syncPlOptionsAndLocalStorage} 
+                                onClickOption={onClickOption} setOnClickOption={setOnClickOption} />
                 : null }
       </Row>
 

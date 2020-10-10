@@ -12,6 +12,27 @@ data = {
       },
       "hotspots": [
         {
+          "name": "mujer",
+          "type": "poster3d",
+          "pos": [
+            "-6.45",
+            "-19.16",
+            "-41.26"
+          ],
+          "image": "resources/mujer-animada.png",
+          "modal": "resources/pdf.pdf",
+          "rot": [
+            "0.00",
+            "0.15",
+            "0.00"
+          ],
+          "scale": "11.28",
+          "alwaysLookatCamera": true,
+          "animatedMap": "3",
+          "animatedMapSpeed": 1,
+          "sprite": true
+        },
+        {
           "name": "new_text-3d_8973",
           "type": "text-3d",
           "pos": [
@@ -44,27 +65,6 @@ data = {
           "emissive": 10030990,
           "transparent": true,
           "popupWhenVisible": 100
-        },
-        {
-          "name": "mujer",
-          "type": "poster3d",
-          "pos": [
-            "-6.45",
-            "-19.16",
-            "-41.26"
-          ],
-          "image": "resources/mujer-animada.png",
-          "modal": "resources/pdf.pdf",
-          "rot": [
-            "0.00",
-            "0.15",
-            "0.00"
-          ],
-          "scale": "11.28",
-          "alwaysLookatCamera": true,
-          "animatedMap": "3",
-          "animatedMapSpeed": 1,
-          "sprite": true
         },
         {
           "name": "casita",

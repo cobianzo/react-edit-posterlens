@@ -3,6 +3,10 @@ import React, {useState, useEffect} from 'react';
 import Button from 'react-bootstrap/Button';
 import InputGroup from 'react-bootstrap/InputGroup';
 
+/**
+ * Input "Select image" that sets the option p.input.option to that image.
+ * Allows 
+ * */
 function InputImage( p ) {
 
     // p : the props obj. 
@@ -44,7 +48,20 @@ function InputImage( p ) {
     }, [pickupImageMode]);
     
 
-    
+    function handlePickImage(event) {
+        // optionally we can interact from outside react with tthe selection. If we have set an element with class 'pl_selected_image', we'll grab that img.
+        if (document.querySelector('.pl_selected_image')) {
+            const selected_img = document.querySelector('.pl_selected_image');
+            if (selected_img.tagName === 'IMG') 
+                p.wrapperUpdateObjectSingleData( selected_img.getAttribute('src') );
+            else if ( selected_img.getAttribute('data-url') ) // we accept that the element with pl_sel.. class has an attribute with the url.
+                p.wrapperUpdateObjectSingleData( selected_img.getAttribute('data-url') );
+            
+            return;
+        }
+        // or standard behaviour. Any img in the window can be clicked and we use its src field as value.
+        setPickupImageMode(p.input.option) 
+    }
 
   return (
     
@@ -55,7 +72,7 @@ function InputImage( p ) {
                     { p.input.label }
                 </InputGroup.Text>
             </InputGroup.Prepend>
-            <InputGroup.Append onClick={ (e) => { setPickupImageMode(p.input.option) } }>
+            <InputGroup.Append onClick={ handlePickImage  }>
                 <InputGroup.Text>
                     { pickupImageMode? 'select an image' : <Button variant="primary">Pick image</Button> }
                 </InputGroup.Text>

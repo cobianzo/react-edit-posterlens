@@ -17,7 +17,7 @@ function Widgets( p ) {
         Array.from([ /*'link', */
                     // 'poster-sprite', // type poster3d + sprite = true
                     'poster3d',
-                    'poster3d-sphere', // type poster3d + posterSphere = true
+                    // 'poster3d-sphere', // type poster3d + posterSphere = true
                     'text-3d', // doesnt work
                     'text-2d',
                    // 'text-2d-sprite' // type text-2d + sprite = true 

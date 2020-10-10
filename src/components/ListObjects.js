@@ -1,15 +1,17 @@
 import React, {useState, useEffect} from 'react'
 
-import Button from 'react-bootstrap/Button'
 import Col from 'react-bootstrap/Col'
 
 export default function ListObjects(p) {
+
+    // init is the current pano params, where we grab the objects to show (hotspots)
     const [init, setInit] = useState(null);
     useEffect(() => {
         console.log('🚴🏼‍♀️Hello from ListObjects')
         setInit(p.getCurrentPanoramaParams());
     }, [p.plOptions])
 
+    // more info for developers. Option popup when visible for an object.
     const getObjectsShowWhenVisible = function() {
         if (!window.pl) return 'not loaded';
         if (!window.pl.viewer.panorama.objectsToPopupWhenVisible) return 'none';

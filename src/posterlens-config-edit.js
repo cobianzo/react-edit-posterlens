@@ -3,7 +3,7 @@ var data = {
   "worlds": [
     {
       "panorama": "resources/p2.jpg",
-      "name": "Hall",
+      "name": "Halli",
       "innerPanorama": {
         "offset": [
           100,
@@ -288,7 +288,7 @@ var data = {
       },
       "hotspots": [
         {
-          "name": "door back hall",
+          "name": "door back halli",
           "type": "poster3d",
           "pos": [
             -322.7607711174291,
@@ -305,7 +305,7 @@ var data = {
           "scale": 214.3588810000002,
           "animated": "always",
           "hoverText": "Back",
-          "link": "Hall"
+          "link": "Halli"
         }
       ]
     }

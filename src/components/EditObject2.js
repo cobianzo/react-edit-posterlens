@@ -2,6 +2,7 @@ import React, {useEffect, useState, createRef} from 'react';
 
 // the <inputs ...
 import InputData from './InputData';
+import InputOnClickOption from './InputOnClickOption';
 
 // bootstrap 4 elements
 import Col from 'react-bootstrap/Col';
@@ -22,7 +23,7 @@ function EditObject2( p ) {
     // triggered on load, only once.
     useEffect(() => { 
         if (!window.pl) return;
-        console.log('pl updated in edit', window.pl);
+        // console.log('pl updated in edit', window.pl);
         const v = window.pl.viewer;
         v.renderer.domElement.addEventListener('mousedown', (event) => { handlerPickupObject(event) });
 
@@ -53,7 +54,7 @@ function EditObject2( p ) {
 
         theObj.distance = v.camera.position.distanceTo(theObj.position);
         window.selectedObj = theObj;
-        console.log('Edit Object cLicked', window.selectedObj.name);
+       // console.log('Edit Object cLicked', window.selectedObj.name);
         
         v.OrbitControls.enabled = false;
         window.selectedObj.originalPos = window.selectedObj.position;                
@@ -184,9 +185,9 @@ function EditObject2( p ) {
         </InputGroup> : null }
 
         <Row>
-            {
+            {   /**  */
                 inputs.map( (inputsCol, col_i) => {
-                    return <Col sm='6' key={'column-'+col_i}>
+                    return <Col sm='4' key={'column-'+col_i}>
                         { 
                             inputsCol.map( (input, i) => {
                                 if ( !p.currentObject3D ) return null;
@@ -200,9 +201,16 @@ function EditObject2( p ) {
                     </Col>
                 })
             }
+            <Col sm="4">
+                <InputOnClickOption key={p.getOptionsByObject3D? p.getOptionsByObject3D.name : 'not'} plOptions={p.plOptions} updateObjectSingleData={p.updateObjectSingleData} 
+                                    currentObject3D={p.currentObject3D}
+                                    getOptionsByObject3D={p.getOptionsByObject3D}
+                                    onClickOption={p.onClickOption} setOnClickOption={p.setOnClickOption} 
+                />
+            </Col>
         </Row>
         
-        <img width='50' src={ window.basePath+'resources/arboles.png' } />
+        <img width='50' className='use-me' src={ window.basePath+'resources/arboles.png' } />
       </Container>        
   );
 }
