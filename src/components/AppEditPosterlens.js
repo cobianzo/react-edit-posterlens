@@ -1,17 +1,13 @@
 import React, {useState, useEffect, createRef} from 'react';
-import EditObject2 from './EditObject2';
-import ListObjects from './ListObjects';
+import EditObjectControls_Bottom from './Layout/EditObjectControls_Bottom';
 import Widgets from './Widgets';
-import ObjectInfo from './ObjectInfo';
-import PanoInfo from './PanoInfo';
 import {round2} from '../helpers';
 
 // Bootstrap 4
-//import 'bootstrap/dist/css/bootstrap.min.css';
-import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
+import TopBarButtonsAndPanels from './Layout/TopBarButtonsAndPanels';
+import CanvasUI3D from './Layout/CanvasUI3D';
 
 export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
   
@@ -21,12 +17,12 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
   const [isEditMode, setIsEditMode] = useState(false); // In this app, it's always true
   
   const [editParams, setEditParams] = useState( {
-    POSTERLENS_CONTAINER_ID: 'posterlens-container',
-    SCALE_FACTOR : 1.01,
-    ROTATE_DEG : 0.05, // radians. 3.1416 is 180 deg.
-    currentMouse3DPosition: [0,0,0],
+    POSTERLENS_CONTAINER_ID: 'posterlens-container', // the div id where we load posterlens
+    SCALE_FACTOR : 1.01,                              // when using ctrl+ and ctrol- keys to change scale of object.
+    ROTATE_DEG : 0.05,                                // radians. 3.1416 is 180 deg.
+    currentMouse3DPosition: [0,0,0],                  // shown in left panel PanoInfo.js
     AUTO_START_EDIT_MODE : 1,
-    isExpertMode: (typeof window.expertMode !== 'undefined')? window.expertMode : true
+    isExpertMode: (typeof window.expertMode !== 'undefined')? window.expertMode : true  // shows more or less info.
   } );
   const [countRestarts, setCountRestarts] = useState(0); // not important
   const [info, setInfo] = useState('');
@@ -72,6 +68,11 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
     formsSync.forEach( formEl => {
       const option = formEl.getAttribute('sync-3d');
       let value = (typeof options[option] !== 'undefined' )? options[option] : '';
+      // special case. The option is an object (rot.0)
+      if (option.includes('.')) {
+        const fields = option.split('.');
+        value = options[fields[0]]? options[fields[0]][fields[1]] : '' ;
+      }
       let inputDefault = formEl.getAttribute('sync-default'); // string "true" or "false"
       inputDefault = typeof inputDefault === 'undefined' || inputDefault === 'false' ? '' : inputDefault;
       if (value === '' && inputDefault) value = inputDefault;
@@ -86,6 +87,7 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
       if (option === 'onClickAction') { // special case. InputOnClickOption: This field handles a state that needs to be updated
         setOnClickOption(value);
       }
+
     })
 
     // currentObject3D.material.blending = 2;
@@ -196,6 +198,8 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
     currentWorldParams.hotspots = newHotspots;
     return plOptionsReplaceWorldParams(currentWorldParams);
   }
+ 
+
 
   // updates plOptions (the js object with all the config to load posterlens).
   // updates the react state and the localstorage (it can be used outside of react). It also uses a callback that can be used outside react.
@@ -207,83 +211,20 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
     return exportStr;
   }
 
-  // Object 3d in viewer ===> Options in pl.
+  // Object 3d in viewer (rot por scale) ===> Options in pl.
   // =======================> Options pl
   function singleObject3DToParams(object3D) {
-  
-
-    // const worldParams = getCurrentPanoramaParams();
-    // let objectHotspotIndex = worldParams.hotspots.findIndex( ht => ht.name === object3D?.name );
-    // if (objectHotspotIndex < 0 ) {
-    //   // not found, we create it. This will never happen. And if it did , it would be wront. It should create more than a name.
-    //   worldParams.hotspots.push({ name: object3D.name });
-    //   objectHotspotIndex = worldParams.hotspots.length - 1;
-    //   //return;
-    // }
-
+ 
     const objectCurrentParams = getOptionsByObject3D(object3D); // worldParams.hotspots[objectHotspotIndex];
-    const objectNewParams     = {...objectCurrentParams};
+    const objectNewParams     = { ...objectCurrentParams };
 
     if (!objectCurrentParams) { alert('error: no objectCP'); return; }
     // pos, scale and rot
-    objectNewParams.pos = [round2(object3D.position.x), round2(object3D.position.y), round2(object3D.position.z)];
-    objectNewParams.rot = [round2(object3D.rotation.x), round2(object3D.rotation.y), round2(object3D.rotation.z)];
+    objectNewParams.pos = [ round2(object3D.position.x), round2(object3D.position.y), round2(object3D.position.z) ];
+    objectNewParams.rot = [ round2(object3D.rotation.x), round2(object3D.rotation.y), round2(object3D.rotation.z) ];
     // if (object3D.name === 'TEST') debugger
-    objectNewParams.scale = round2(object3D.scale.x);
-    // map params from object into options:
+    objectNewParams.scale = round2(object3D.scale.x);  
 
-    const defaults = { 'opacity': 1, 'animatedMap': 1 }
-    const mapParams = {
-      'opacity': 'material.opacity',
-      'type' : 'type',
-    }
-    
-    // special params for type
-    switch (object3D.type) {
-      case 'pl_text-3d': 
-        mapParams.emissive = 'material.emissive';
-        mapParams.transparent = 'material.transparent';
-        break;
-      case 'pl_text-2d-sprite': 
-      case 'pl_text-2d': 
-        mapParams.color = 'material.color';
-        break;
-      case 'pl_poster3d': 
-        // mapParams.animatedMap = 'material.transparent';
-      default:
-      break;
-    }
-
-    // foreach field in the object 3d we save it as an option param
-    Object.keys(mapParams).forEach( option => {
-      const obFields = mapParams[option].split('.');
-      var currentField = object3D; // currentField has the value in the object 3d. ie, for field opacity, it has 0.5
-      obFields.forEach( field => currentField = currentField[field] ); // currentfield = "resources/img.jpg"
-      // fix if it's a color (rgb object): convert into string
-      // if (currentField.hasOwnProperty('r') && currentField.hasOwnProperty('g')) currentField = currentField.getHexString();
-      // fix type. In object has prefix pl_
-      if (option==='type') currentField = currentField.replace('pl_', '');
-      // if (option==='background') currentField = currentField? currentField : 'transparent';
-      
-
-      if (currentField === null && objectNewParams.hasOwnProperty(option)) 
-        delete(objectNewParams[option]);
-      else {
-        if (defaults.hasOwnProperty(option)) { // save only if it not default
-          if (defaults[option] != currentField) 
-            objectNewParams[option] = currentField; // { "image" : "resources/img.jpg" }
-        } else
-          objectNewParams[option] = currentField;
-      }
-    } );
-
-    // params only in options and not visible from object 3D (we need a panel and an input to edit it)
-    // image, animatedMap, animatedMapSpeed, alwaysLookatCamera, text, hoverText, link
-    
-
-    // update pl with the new options
-    // const newOptions = Object.assign({}, plOptions);
-    // newOptions.worlds[getCurrentPanoramaParamsIndex()].hotspots[objectHotspotIndex] = objectNewParams;
     const newOptions = plOptionsReplaceWorldParamsHotspot(object3D.name, objectNewParams);
     syncPlOptionsAndLocalStorage(newOptions);
     
@@ -357,8 +298,8 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
       syncPlOptionsAndLocalStorage(newPlOptions);
       
       // regenerate the 3d object (remove and generate)
+      const object = window.pl.getObjectByName(name);
       if (regenerate) {
-        const object = window.pl.getObjectByName(name);
         if (name && window.pl.viewer.panorama && objectData ) {
           window.pl.viewer.panorama.remove( object );
           window.pl.createNewObjectFromParams(window.pl.viewer.panorama, objectData); // recreate the 3d in the viewer
@@ -369,6 +310,12 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
         else {        
           selectObject(object);
         }
+      } // end regenrate
+
+      // special field: name. TODO: check name is not repeated.
+      if ( object && fields.hasOwnProperty('name') ) {
+        object.name = fields.name;
+        setCurrentObject3D(object);
       }
   }
 
@@ -386,47 +333,27 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
 
 
   return <React.Fragment>
-    { currentObject3D? 
-        <ObjectInfo currentObject3D={currentObject3D} getCurrentPanoramaParams={getCurrentPanoramaParams} editParams={editParams} /> : 
-        <PanoInfo currentObject3D={currentObject3D} getCurrentPanoramaParams={getCurrentPanoramaParams} editParams={editParams} /> 
-    }
-    { plOptions? <ListObjects currentObject3D={currentObject3D} plOptions={plOptions} selectObject={selectObject} editParams={editParams}
-                              setCurrentObject3D={setCurrentObject3D} getCurrentPanoramaParams={getCurrentPanoramaParams} /> : null }
-    <Container className='wrapper border pt-2' style={{ maxWidth:'1200px' }}>
+     
+    <Container className={ 'wrapper border pt-2' + (editParams.isExpertMode? ' expert-mode' : ' no-expert-mode') } style={{ maxWidth:'1200px' }}>
+      
+      <TopBarButtonsAndPanels currentObject3D={currentObject3D} setCurrentObject3D={setCurrentObject3D} getCurrentPanoramaParams={getCurrentPanoramaParams} 
+                              plOptions={plOptions} editParams={editParams} selectObject={selectObject}
+                             plOptionsReplaceWorldParams={plOptionsReplaceWorldParams} syncPlOptionsAndLocalStorage={syncPlOptionsAndLocalStorage}
+                             restartViewer={restartViewer} removeCurrentObject={removeCurrentObject} setAppMode={setAppMode} countRestarts={countRestarts} 
+                             exportToTextarea={exportToTextarea} cloneCurrentObject={cloneCurrentObject} />
 
-      { plOptions && editParams.isExpertMode ? 
-        <Button className="btn-sm" onClick={ e => restartViewer() }> RESET <span className="badge">{countRestarts}</span> </Button>         : null } 
-      { !isEditMode? 
-        <Button className="btn-secondary ml-5 btn-sm" onClick={ setIsEditMode(!isEditMode) }>Start Edit Mode</Button> : null } 
-      { plOptions && editParams.isExpertMode ? 
-        <Button className="btn btn-danger btn-sm" onClick={ (e) => { localStorage.setItem('pl.o', null); restartViewer(); }  }>Clear cache </Button> : null }
-      { editParams.isExpertMode ? 
-        <Button className="btn-secondary ml-5 btn-sm" onClick={ () => exportToTextarea() }>Export</Button> : null }
-
-        { currentObject3D? 
-        <Button className="btn btn-danger btn-sm" onClick={ removeCurrentObject }>Delete</Button> : null }
-        { currentObject3D? 
-        <Button className="btn btn-success btn-sm" onClick={ cloneCurrentObject }>Clone</Button> : null }
-
-        { currentObject3D? 
-        <Button className="btn btn-warning btn-sm" onClick={ ()=> { setCurrentObject3D(null); window.lastSelectedObj = null; } }>Unselect</Button> : null }
-
-        <Button variant="outline-secondary btn-sm ml-3" onClick={ (e)=> setAppMode('demo') }>Demo</Button>
-
+      
+      <CanvasUI3D reactGetMouse3Dposition={reactGetMouse3Dposition} editParams={editParams} />
+      
+      { isEditMode? 
       <Row className="no-gutters" >
-        <Col sm={12}>
-          <div onMouseMove={ event => { reactGetMouse3Dposition(event); } } ref={refContainerParent}>
-           <div  id={editParams.POSTERLENS_CONTAINER_ID} className='posterlens-container' ref={refContainer}> </div>
-          </div>
-        </Col>
-        { isEditMode? 
-                   <EditObject2 plOptions={plOptions} isEditMode={isEditMode} editParams={editParams} currentObject3D={currentObject3D} setCurrentObject3D={setCurrentObject3D} reactGetMouse3Dposition={reactGetMouse3Dposition} 
-                                singleObject3DToParams={singleObject3DToParams} setInfo={setInfo} updateObjectSingleData={updateObjectSingleData}
-                                getCurrentPanoramaParams={getCurrentPanoramaParams} selectObject={selectObject} getOptionsByObject3D={getOptionsByObject3D}
-                                appAsWidget={appAsWidget} plOptionsReplaceWorldParams={plOptionsReplaceWorldParams} syncPlOptionsAndLocalStorage={syncPlOptionsAndLocalStorage} 
-                                onClickOption={onClickOption} setOnClickOption={setOnClickOption} />
-                : null }
+        <EditObjectControls_Bottom plOptions={plOptions} isEditMode={isEditMode} editParams={editParams} currentObject3D={currentObject3D} setCurrentObject3D={setCurrentObject3D} reactGetMouse3Dposition={reactGetMouse3Dposition} 
+                    singleObject3DToParams={singleObject3DToParams} setInfo={setInfo} updateObjectSingleData={updateObjectSingleData}
+                    getCurrentPanoramaParams={getCurrentPanoramaParams} selectObject={selectObject} getOptionsByObject3D={getOptionsByObject3D}
+                    appAsWidget={appAsWidget} plOptionsReplaceWorldParams={plOptionsReplaceWorldParams} syncPlOptionsAndLocalStorage={syncPlOptionsAndLocalStorage} 
+                    onClickOption={onClickOption} setOnClickOption={setOnClickOption} />
       </Row>
+      : null }
 
 
       

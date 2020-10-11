@@ -65,7 +65,7 @@ function InputImage( p ) {
 
   return (
     
-        <InputGroup>
+        <InputGroup className={ 'input-group-' + p.input.option }>
 
             <InputGroup.Prepend>
                 <InputGroup.Text>

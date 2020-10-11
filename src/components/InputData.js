@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 import Button from 'react-bootstrap/Button';
 
@@ -10,6 +10,8 @@ import Form from 'react-bootstrap/Form';
 
 export default function Input(p) {
 
+    const [infoMsg, setInfoMsg] = useState('');
+
     // udpated fied p.input.option with the value. Some fields have special treatment
     const wrapperUpdateObjectSingleData = function (value) {
         let theValue = value === p.input.deleteIfValue ? null : value; // with this we will remove the option from the params.
@@ -18,10 +20,16 @@ export default function Input(p) {
         if ( p.input.option === 'background' && theValue === '' ) fieldPair[p.input.option] = 'transparent'; // no bg color => background: 'transparent'
         if ( p.input.option === 'sprite' && theValue === true ) fieldPair.scale = p.currentObject3D.scale.x * 10; // if we convert into sprite we better scale or it will look tiny
         if ( p.input.option === 'sprite' && !theValue ) fieldPair.scale = p.currentObject3D.scale.x / 10; // the other way as well.
-        p.updateObjectSingleData( p.currentObject3D.name, fieldPair);
+        let regenerate = ['name'].includes(p.input.option)? false : true; // regenerate bu default , except in some, like 'name'
+        p.updateObjectSingleData( p.currentObject3D.name, fieldPair, regenerate);
+        setInfoMsg('Applied!');  setTimeout(()=>setInfoMsg(''), 1000);
+
     }
 
     const viewInput = function() {
+        
+        const currentValue = p.getOptionsByObject3D(p.currentObject3D, p.input.option);
+        // if (p.input.option === 'emissive') debugger
         switch (p.input.type) {
             case "image-pick":
                 return <InputImage input={p.input} currentObject3D={p.currentObject3D} getOptionsByObject3D={p.getOptionsByObject3D}
@@ -42,41 +50,47 @@ export default function Input(p) {
                 <Button variant='danger' onClick={ (e) => { wrapperUpdateObjectSingleData(null) } }>
                     Clear
                 </Button >
-                <InputGroup.Append> <InputGroup.Text>{p.getOptionsByObject3D(p.currentObject3D, p.input.option)}</InputGroup.Text></InputGroup.Append>
+                <InputGroup.Append> <InputGroup.Text>{currentValue}</InputGroup.Text></InputGroup.Append>
                 </InputGroup>
             case "input":
-                return <form onSubmit={ (e) => { e.preventDefault(); wrapperUpdateObjectSingleData(e.currentTarget.querySelector('input').value) } }
-                                sync-3d={p.input.option}
+                return <form 
+                            onSubmit={ (e) => { e.preventDefault(); 
+                                    wrapperUpdateObjectSingleData(e.currentTarget.querySelector('input').value) } }
                         >
                     <InputGroup>
-                        <InputGroup.Prepend> <InputGroup.Text>{p.input.label}</InputGroup.Text></InputGroup.Prepend>
-                        <FormControl as='input' defaultValue={p.getOptionsByObject3D(p.currentObject3D, p.input.option)}  />
-                        <InputGroup.Append><InputGroup.Text> {p.getOptionsByObject3D(p.currentObject3D, p.input.option)} </InputGroup.Text> </InputGroup.Append>
+                    {p.input.label ? <InputGroup.Prepend> <InputGroup.Text>{p.input.label}</InputGroup.Text></InputGroup.Prepend> : null }
+                        <FormControl as='input' defaultValue={currentValue} onChange={ e => setInfoMsg('Enter to save') }  placeholder={ p.input.placeholder?? ' '} />
+                        <InputGroup.Append onClick={ (e) => infoMsg ? wrapperUpdateObjectSingleData(e.currentTarget.closest('form').querySelector('input').value) : false } >
+                            <InputGroup.Text> { infoMsg || currentValue  } </InputGroup.Text>
+                        </InputGroup.Append>
                     </InputGroup>
                 </form>
             case "number":
                 return  <form onSubmit={ (e) => { e.preventDefault(); wrapperUpdateObjectSingleData(e.currentTarget.querySelector('input').value) } }
-                                sync-3d={p.input.option} >
+                             >
                             <InputGroup>
-                                <InputGroup.Prepend> <InputGroup.Text>{p.input.label}</InputGroup.Text></InputGroup.Prepend>
-                                <Form.Check type="number" step={ p.input.step?? 1 }
-                                    defaultValue={p.getOptionsByObject3D(p.currentObject3D, p.input.option)} />
-                                <InputGroup.Append><InputGroup.Text> {p.getOptionsByObject3D(p.currentObject3D, p.input.option)} </InputGroup.Text> </InputGroup.Append>
+                                {p.input.label ? <InputGroup.Prepend> <InputGroup.Text>{p.input.label}</InputGroup.Text></InputGroup.Prepend> : null }
+                                <Form.Check type="number" step={ p.input.step?? 1 } placeholder={ p.input.placeholder?? ' '}
+                                    defaultValue={currentValue} min={p.input.min?? 0 } max={p.input.max?? null } 
+                                    onChange={ e => setInfoMsg('Enter to save') } />
+                                <InputGroup.Append onClick={ (e) => infoMsg ? wrapperUpdateObjectSingleData(e.currentTarget.closest('form').querySelector('input').value) : false } >
+                                    <InputGroup.Text> { infoMsg || currentValue  } </InputGroup.Text> 
+                                </InputGroup.Append>
                             </InputGroup>
                         </form>
             case "checkbox":
-                return <Form.Group sync-3d={p.input.option} sync-default={p.input.deleteIfValue? "true" : "false"} >
-                <Form.Check type="checkbox" label={p.input.label + `(${p.getOptionsByObject3D(p.currentObject3D, p.input.option)})`}
-                            defaultChecked={p.getOptionsByObject3D(p.currentObject3D, p.input.option) === p.input.checkedValue() || p.input.deleteIfValue === p.input.checkedValue() }
+                return <Form.Group>
+                <Form.Check type="checkbox" label={p.input.label + `(${currentValue})`}
+                            defaultChecked={currentValue === p.input.checkedValue() || p.input.deleteIfValue === p.input.checkedValue() }
                                 onChange={ (e) => {
                                     const value = e.currentTarget.checked? p.input.checkedValue(p.currentObject3D) : p.input.uncheckedValue(p.currentObject3D) ;
                                     wrapperUpdateObjectSingleData(value);                                            
                                 } } />
                 </Form.Group>
             case "select":
-                return <InputGroup sync-3d={p.input.option}>
+                return <InputGroup>
                      <InputGroup.Prepend> <InputGroup.Text>{p.input.label}</InputGroup.Text></InputGroup.Prepend>
-                    <FormControl as='select' defaultValue={p.getOptionsByObject3D(p.currentObject3D, p.input.option)}
+                    <FormControl as='select' defaultValue={currentValue}
                                         onChange={ (e) => wrapperUpdateObjectSingleData(e.target.value) } >
                                 <option key='nothing' value='' >---</option>
                                 {   
@@ -85,20 +99,24 @@ export default function Input(p) {
                                     }) : null
                                 }
                     </FormControl>
-                    <InputGroup.Append><InputGroup.Text> {p.getOptionsByObject3D(p.currentObject3D, p.input.option)} </InputGroup.Text> </InputGroup.Append>
+                    <InputGroup.Append><InputGroup.Text> { currentValue } </InputGroup.Text> </InputGroup.Append>
                 </InputGroup>
                 break;
             case "color":
                 return <InputGroup sync-3d={p.input.option}>
                         <InputGroup.Prepend> <InputGroup.Text>{p.input.label}</InputGroup.Text></InputGroup.Prepend>
-                        <input type="color" defaultValue={p.getOptionsByObject3D(p.currentObject3D, p.input.option)}
+                        <input type="color" defaultValue={ currentValue || p.input.deleteIfValue }
                                 onChange={ (e) => wrapperUpdateObjectSingleData(e.target.value) }></input>
-                    
+                        <InputGroup.Append><InputGroup.Text> {currentValue} </InputGroup.Text> </InputGroup.Append>
                 </InputGroup>
             default:
             break;
         }
     }
 
-    return viewInput();
+    return <div className={ p.input.type + '-type ' + (infoMsg? 'editing ' : 'no-editing ') + (p.class?? '') }
+                id={ 'input-' + p.input.option} 
+                sync-3d={ ['image'].includes(p.input.type)? '' : p.input.option} sync-default={p.input.deleteIfValue? "true" : "false"}> { 
+                viewInput()
+            }</div>
 }

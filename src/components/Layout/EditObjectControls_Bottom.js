@@ -1,8 +1,9 @@
 import React, {useEffect, useState, createRef} from 'react';
 
 // the <inputs ...
-import InputData from './InputData';
-import InputOnClickOption from './InputOnClickOption';
+import InputData from '../InputData';
+import InputOnClickOption from '../InputOnClickOption';
+import InputsRotation from '../InputsRotation';
 
 // bootstrap 4 elements
 import Col from 'react-bootstrap/Col';
@@ -10,9 +11,8 @@ import Row from 'react-bootstrap/Row';
 import Container from 'react-bootstrap/Container';
 import FormControl from 'react-bootstrap/FormControl';
 import InputGroup from 'react-bootstrap/InputGroup';
-import Button from 'react-bootstrap/esm/Button';
 
-function EditObject2( p ) {
+function EditObjectControls_Bottom( p ) {
 
     const [imgPath, setImgPath] = useState( window.plImgPath?? 'resources/'); // imgs for 3d textures
     const refImgPathInput = createRef();
@@ -50,7 +50,7 @@ function EditObject2( p ) {
         
         const intersects = v.raycaster.intersectObject( v.panorama, true );
         const theObj = intersects[0]? intersects[0].object : null ;
-        if (!theObj.type?.startsWith('pl_')) return;
+        if (!theObj || !theObj.type?.startsWith('pl_')) return;
 
         theObj.distance = v.camera.position.distanceTo(theObj.position);
         window.selectedObj = theObj;
@@ -97,14 +97,14 @@ function EditObject2( p ) {
                     p.setInfo('Sprite object cannot be rotated'); 
             }
             p.setCurrentObject3D(window.lastSelectedObj);
-            if (window.waitSave) {
+            if (window.waitSave) 
                 clearTimeout(window.waitSave);
-                window.waitSave = setTimeout( () => {
-                    p.singleObject3DToParams(window.lastSelectedObj);
-                    clearTimeout(window.waitSave);
-                    p.setInfo('updated');
-                }, 500);
-            }
+            window.waitSave = setTimeout( () => {
+                p.singleObject3DToParams(window.lastSelectedObj);
+                clearTimeout(window.waitSave);
+                p.setInfo('updated');
+            }, 200);
+            
             
         }
     }
@@ -127,53 +127,54 @@ function EditObject2( p ) {
     
     const panoList = {}; // for the `link` option below
     if (p.plOptions)
-    p.plOptions.worlds.forEach( world => panoList[world.name] = world.name  );
+        p.plOptions.worlds.forEach( world => panoList[world.name] = world.name  );
     const inputs = [
         [
             { option: 'image', type: (p.appAsWidget? 'image-pick' : 'image'), label:'Img', active: [ 'pl_poster3d' ], deleteIfValue:'' },
             { option: 'alpha', type: (p.appAsWidget? 'image-pick' : 'image'), label:'Alpha', active: [ 'pl_poster3d' ], deleteIfValue:'' },
             { option: 'text', type: 'input', label:'Text', active: [ 'pl_text-2d', 'pl_text-3d'] },
-            { option: 'emissive', type: 'color', label:'Emissive Color', active: [ 'pl_text-3d'] },
+            { option: 'emissive', type: 'color', label:'Emissive Color', active: [ 'pl_text-3d'], deleteIfValue:'#ffffff' },
             { option: 'color', type: 'color', label:'Text Color', active: [ 'pl_text-2d'], deleteIfValue:'#ffffff' },
             { option: 'background', type: 'color', label:'Background', active: [ 'pl_text-2d'], deleteIfValue:'#000000' },
             // TODO: we need to give an option for bg transparent 
             { option: 'alwaysLookatCamera', type: 'checkbox', label:'alwaysLookatCamera', checkedValue: () => true, uncheckedValue: () => false, active: [ 'pl_text-2d', 'pl_text-3d', 'pl_poster3d' ], deleteIfValue: true },
             { option: 'sprite', type: 'checkbox', label:'sprite 2D', checkedValue: () => true, uncheckedValue: () => null, active: [ 'pl_text-2d', 'pl_poster3d' ], deleteIfValue: false },
             { option: 'posterSphere', type: 'checkbox', label:'is sphere', checkedValue: () => true, uncheckedValue: () => null, active: [ 'pl_text-2d', 'pl_poster3d' ], deleteIfValue: false },
-            { option: 'link', type: 'select', options: panoList, label:'Go to pano', active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
-            { option: 'modal', type: 'input', label:'modal', active: [ 'pl_poster3d', 'pl_text-2d', 'pl_text-3d'], deleteIfValue:'' },
-            { option: 'opacity', type: 'number', step: 0.05, label:'Opacity', active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '1' },
+            //{ option: 'link', type: 'select', options: panoList, label:'Go to pano', active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
+            //{ option: 'modal', type: 'input', label:'modal', active: [ 'pl_poster3d', 'pl_text-2d', 'pl_text-3d'], deleteIfValue:'' },
+            { option: 'opacity', type: 'number', step: 0.05, min:0, max:1, label:'Opacity', active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '1' },
         ],
         [
-        { option: 'animatedMap', type: 'number', label:'frames animation map', active: [ 'pl_poster3d' ], deleteIfValue: '' },
+        { option: 'animatedMap', type: 'number', label:'frames map', active: [ 'pl_poster3d' ], deleteIfValue: '' },
         { option: 'animatedMapSpeed', type: 'number', label:'speed', active: [ 'pl_poster3d' ], deleteIfValue: '' },
-        { option: 'rotationX', type: 'number', label:'Rotate anim X', step: 100, active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
-        { option: 'rotationY', type: 'number', label:'Rotate anim Y', step: 100, active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
-        { option: 'rotationZ', type: 'number', label:'Rotate anim Z', step: 100, active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
+        { option: 'rotationX', type: 'number', label:'Rotate animat', placeholder: 'x', step: 100, active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
+        { option: 'rotationY', type: 'number', label:'', placeholder: 'y',  step: 100, active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
+        { option: 'rotationZ', type: 'number', label:'', placeholder: 'z',  step: 100, active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
         { option: 'animated', type: 'select', label:'Glow animation', options: { 'always' : 'always', 'only on hover' : 'hover' }, active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
         { option: 'popupWhenVisible', type: 'number', step: 10, label:'Pops up when in camera', active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
         ]
     ];
     return (
       <Container className="edit-panel">
-        { /* The name of the object */}
+        { /* The name of the object */ }
         {p.currentObject3D? 
         <Row>
-            <InputData   input={ { option: 'name', type: 'input', label:'NAME', active: [ 'pl_poster3d', 'pl_text-2d', 'pl_text-3d'] } } 
-                            imgPath={imgPath}
+            <InputData   input={ { option: 'name', type: 'input', label:'', active: [ 'pl_poster3d', 'pl_text-2d', 'pl_text-3d'] } } 
                             updateObjectSingleData={p.updateObjectSingleData} 
                             currentObject3D={p.currentObject3D}
-                            getOptionsByObject3D={p.getOptionsByObject3D} />
-        </Row> : null }
+                            getOptionsByObject3D={p.getOptionsByObject3D} 
+                            class="col-3"
+                            />
 
-        <Button variant="primary" className='float-right' onClick={ (e)=> {                 
-            const currentPanoParams =  p.getCurrentPanoramaParams();
-            currentPanoParams.initialLookAt = window.pl.getCameraDirection('lookatPoint');
-            currentPanoParams.initialFov = window.pl.viewer.camera.fov;
-            const newOptions = p.plOptionsReplaceWorldParams(currentPanoParams);
-            p.syncPlOptionsAndLocalStorage(newOptions);
-         } }>Set camera view</Button>
-        
+        { /* The inputs in sync with the 3d object */ }
+            <div className='col-9'>
+                <InputsRotation  class="row"
+                            updateObjectSingleData={p.updateObjectSingleData} 
+                            getCurrentPanoramaParams={p.getCurrentPanoramaParams}
+                            currentObject3D={p.currentObject3D}
+                            getOptionsByObject3D={p.getOptionsByObject3D} />
+            </div>
+        </Row> : null }        
 
         { /* The imgs path (not needed anymore) */}
         { !p.appAsWidget?
@@ -187,14 +188,15 @@ function EditObject2( p ) {
         <Row>
             {   /**  */
                 inputs.map( (inputsCol, col_i) => {
-                    return <Col sm='4' key={'column-'+col_i}>
+                    return <Col sm='4' className='border bg-light' key={'column-'+col_i}>
+                        <label className='d-block h5'>{ col_i === 0 ? 'Main props' : 'Animation' }</label>
                         { 
                             inputsCol.map( (input, i) => {
                                 if ( !p.currentObject3D ) return null;
                                 if ( !input.active.includes(p.currentObject3D.type) ) return null;
                                 return <InputData   input={input} imgPath={imgPath} key={'input-'+i}
                                                     updateObjectSingleData={p.updateObjectSingleData} 
-                                                    currentObject3D={p.currentObject3D}
+                                                    currentObject3D={p.currentObject3D} setCurrentObject3D={p.setCurrentObject3D}
                                                     getOptionsByObject3D={p.getOptionsByObject3D} />
                             } )
                         }
@@ -210,9 +212,9 @@ function EditObject2( p ) {
             </Col>
         </Row>
         
-        <img width='50' className='use-me' src={ window.basePath+'resources/arboles.png' } />
+        {/* <img width='50' className='use-me' src={ window.basePath+'resources/arboles.png' } /> */}
       </Container>        
   );
 }
 
-export default EditObject2;
+export default EditObjectControls_Bottom;
