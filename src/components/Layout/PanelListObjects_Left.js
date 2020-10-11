@@ -3,7 +3,7 @@ import React, {useState, useEffect} from 'react'
 import Col from 'react-bootstrap/Col'
 
 
-export default function PanelListObjects_Left(p) {
+export default function PanelListObjects_Left( p ) {
 
     // init is the current pano params, where we grab the objects to show (hotspots)
     const [init, setInit] = useState(null);

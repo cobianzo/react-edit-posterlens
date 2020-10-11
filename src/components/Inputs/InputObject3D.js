@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react'
+/**
+ * Represent an <input> in sync with props of the current3DObject inside the Canvas, which will also update the data in plOptions.  
+ * The difference with InputData is that InputData is in sync only with the datamodel (the plOptions) of the current selected object.
+ */
+
+import { SyncObject3d__DataHotspot } from '../SyncDataAlongApp'
 
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 
-import {round2} from '../helpers'
-
-/**
- * Inputs in sync with props of the current3DObject inside the Canvas.
- * The difference with InputData is that InputData is in sync with the datamodel (the options) of the current selected object.
- */
 function InputObject3D( { input, props: p } ) {
     if (!p.currentObject3D) return null;
 
@@ -36,24 +36,8 @@ function InputObject3D( { input, props: p } ) {
         // do we need to use setCurrentObject3D? Aparently not.
     }
 
-    /*  WHAT : updates the pl options data of the hotspot related to the current selected 3Dobject in UI
-        props: 'rotation.x', val : 0.55 . */
-    function updateDataObject(props, val) {
-        const dataValue = parseInt(val * 100)/100;
-        if (props.includes('rotation')) {
-            const rotData = getObjectData(p.currentObject3D.name, 'rot', input.default); // [1, 0.2, 0 ]
-            if (props.includes('.x')) rotData[0] = dataValue;
-            if (props.includes('.y')) rotData[1] = dataValue;
-            if (props.includes('.z')) rotData[2] = dataValue;
-            p.updateObjectSingleData( p.currentObject3D.name, { 'rot' : rotData }, false);
-        }
-        if (props.includes('scale')) {
-            const scale = getObjectData(p.currentObject3D.name, 'scale', input.default);
-            p.updateObjectSingleData( p.currentObject3D.name, { 'scale' : dataValue }, false);
-        }
-    }
-
     /*  helper.          Returns the field value, for the selected hotspot in the pl data options. */
+    // TODO: we can use getOptionsByObject3D, which is the same functinoality
     const getObjectData = function(objectName, dataField, defaultVal) {
         const currentWorldOptions = p.getCurrentPanoramaParams();
         let objectHotspotData = currentWorldOptions.hotspots.find( ht => ht.name === objectName );
@@ -77,7 +61,12 @@ function InputObject3D( { input, props: p } ) {
                 } }
                 onMouseUp ={ (e) => {
                     // update the data only when finishing editing
-                    updateDataObject(input.prop, e.target.value);
+                    SyncObject3d__DataHotspot( { 
+                        object3D: window.lastSelectedObj,
+                        getOptionsByObject3D: p.getOptionsByObject3D, 
+                        setPlOptions: p.setPlOptions,
+                        plOptionsReplaceWorldParamsHotspot: p.plOptionsReplaceWorldParamsHotspot} );
+                    // updateDataObject(input.prop, e.target.value);
                 } }
             /> 
             <InputGroup.Append> <InputGroup.Text>{ getCurrentValueFromObject3D(input.prop) }</InputGroup.Text></InputGroup.Append>

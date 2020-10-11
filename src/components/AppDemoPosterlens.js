@@ -2,8 +2,6 @@ import React, {useEffect, createRef} from 'react'
 
 function AppDemoPosterlens( { data, setAppMode, appAsWidget } ) {
     
-    var refContainer = createRef();
-
     useEffect(() => {
         console.log('hello from useEffect in App');
         // create the interactive 3d viewer with posterlens
@@ -42,7 +40,7 @@ function AppDemoPosterlens( { data, setAppMode, appAsWidget } ) {
                     <button className='btn btn-sm btn-primary' onClick={ ()=> setAppMode('edit') }>Back</button>
                     : null }
             </h1> 
-            <div className='posterlens-container' id='posterlens-container' ref={refContainer}></div>
+            <div className='posterlens-container' id='posterlens-container'></div>
         </div>
     )
 }

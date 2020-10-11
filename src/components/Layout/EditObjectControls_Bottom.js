@@ -1,9 +1,12 @@
 import React, {useEffect, useState, createRef} from 'react';
 
 // the <inputs ...
-import InputData from '../InputData';
-import InputOnClickOption from '../InputOnClickOption';
-import InputsRotation from '../InputsRotation';
+import InputData from '../Inputs/InputData';
+import InputOnClickOption from '../Inputs/InputOnClickOption';
+import InputsRotation from '../Inputs/InputsRotation';
+
+import { SyncObject3d__DataHotspot } from '../SyncDataAlongApp'
+import { reactGetMouse3Dposition } from '../../helpers';
 
 // bootstrap 4 elements
 import Col from 'react-bootstrap/Col';
@@ -20,59 +23,11 @@ function EditObjectControls_Bottom( p ) {
     // Important note. Inside a new EventListener, we can't access to updated props. The props will always have the initial value
     // That's why I use window.selectedObj instead of p.currentObject3D, to access to the lastest Position.
 
-    // triggered on load, only once.
     useEffect(() => { 
         if (!window.pl) return;
-        // console.log('pl updated in edit', window.pl);
-        const v = window.pl.viewer;
-        v.renderer.domElement.addEventListener('mousedown', (event) => { handlerPickupObject(event) });
-
-        // --- move object 
-        v.renderer.domElement.addEventListener('mousemove', function (event) {
-            if (!window.selectedObj) return;
-            let newPos = p.reactGetMouse3Dposition(event, window.pl);
-            if (!newPos) return;
-            const v = new window.THREE.Vector3(...newPos).normalize().multiplyScalar(window.selectedObj.distance);
-            newPos = [v.x, v.y, v.z];
-            window.pl.setObjectPos(window.selectedObj, newPos);
-        });
-        v.renderer.domElement.addEventListener('mouseup', (event) => { handlerDropObject(event) });
         document.addEventListener('keydown', (event) => { handlerScaleRotateObject(event) } );
         
-    }, [p.plOptions] );
-
-    // --- pickup object 
-    const handlerPickupObject = (event) => {
-        if ( !p.isEditMode ) return;
-        if (window.pl.shiftIsPressed) return;
-
-        const v = window.pl.viewer;
-        
-        const intersects = v.raycaster.intersectObject( v.panorama, true );
-        const theObj = intersects[0]? intersects[0].object : null ;
-        if (!theObj || !theObj.type?.startsWith('pl_')) return;
-
-        theObj.distance = v.camera.position.distanceTo(theObj.position);
-        window.selectedObj = theObj;
-       // console.log('Edit Object cLicked', window.selectedObj.name);
-        
-        v.OrbitControls.enabled = false;
-        window.selectedObj.originalPos = window.selectedObj.position;                
-        
-        // State: assign lastSelectedObj and update state currentObject3D
-        p.selectObject(theObj);
-    }
-
-    // --- drop object 
-    const handlerDropObject = (event) => {  
-        if ( !p.isEditMode || !window.selectedObj) return;
-        if (!window.selectedObj.type.startsWith('pl_')) return;
-        const v = window.pl.viewer;
-        v.OrbitControls.enabled = true;
-        // p.singleObject3DToParams(window.selectedObj);
-        p.singleObject3DToParams(window.selectedObj);
-        window.selectedObj = null;
-    };
+    }, [] );
 
     const handlerScaleRotateObject = function(event) {
         // we cant use the state currentObject3D, because it will not get the latest value. It will be initialzied to the time of creation og this handler
@@ -92,17 +47,16 @@ function EditObjectControls_Bottom( p ) {
                 default:
                     break;
             }
-            if (event.key === 'r' || event.key === 't' || event.key === 'f' || event.key === 'g' || event.key === 'v' || event.key === 'b') {
-                if (window.lastSelectedObj.constructor.name === 'Infospot') // deprecated
-                    p.setInfo('Sprite object cannot be rotated'); 
-            }
             p.setCurrentObject3D(window.lastSelectedObj);
             if (window.waitSave) 
                 clearTimeout(window.waitSave);
             window.waitSave = setTimeout( () => {
-                p.singleObject3DToParams(window.lastSelectedObj);
+                SyncObject3d__DataHotspot( { 
+                    object3D: window.lastSelectedObj,
+                    getOptionsByObject3D: p.getOptionsByObject3D, 
+                    setPlOptions: p.setPlOptions,
+                    plOptionsReplaceWorldParamsHotspot: p.plOptionsReplaceWorldParamsHotspot} );
                 clearTimeout(window.waitSave);
-                p.setInfo('updated');
             }, 200);
             
             
@@ -160,19 +114,25 @@ function EditObjectControls_Bottom( p ) {
         {p.currentObject3D? 
         <Row>
             <InputData   input={ { option: 'name', type: 'input', label:'', active: [ 'pl_poster3d', 'pl_text-2d', 'pl_text-3d'] } } 
-                            updateObjectSingleData={p.updateObjectSingleData} 
                             currentObject3D={p.currentObject3D}
                             getOptionsByObject3D={p.getOptionsByObject3D} 
+                            getCurrentPanoramaParams={p.getCurrentPanoramaParams}
+                            plOptionsReplaceWorldParamsHotspot={p.plOptionsReplaceWorldParamsHotspot}
+                            setPlOptions={p.setPlOptions}
+                            selectObject={p.selectObject}
+                            setCurrentObject3D={p.setCurrentObject3D}
                             class="col-3"
                             />
 
         { /* The inputs in sync with the 3d object */ }
             <div className='col-9'>
                 <InputsRotation  class="row"
-                            updateObjectSingleData={p.updateObjectSingleData} 
                             getCurrentPanoramaParams={p.getCurrentPanoramaParams}
-                            currentObject3D={p.currentObject3D}
-                            getOptionsByObject3D={p.getOptionsByObject3D} />
+                            currentObject3D={p.currentObject3D} setPlOptions={p.setPlOptions}
+                            plOptionsReplaceWorldParamsHotspot={p.plOptionsReplaceWorldParamsHotspot}
+                            getOptionsByObject3D={p.getOptionsByObject3D}
+                            selectObject={p.selectObject}
+                            setCurrentObject3D={p.setCurrentObject3D} />
             </div>
         </Row> : null }        
 
@@ -195,19 +155,29 @@ function EditObjectControls_Bottom( p ) {
                                 if ( !p.currentObject3D ) return null;
                                 if ( !input.active.includes(p.currentObject3D.type) ) return null;
                                 return <InputData   input={input} imgPath={imgPath} key={'input-'+i}
-                                                    updateObjectSingleData={p.updateObjectSingleData} 
                                                     currentObject3D={p.currentObject3D} setCurrentObject3D={p.setCurrentObject3D}
-                                                    getOptionsByObject3D={p.getOptionsByObject3D} />
+                                                    getOptionsByObject3D={p.getOptionsByObject3D}
+                                                    getCurrentPanoramaParams={p.getCurrentPanoramaParams}
+                                                    plOptionsReplaceWorldParamsHotspot={p.plOptionsReplaceWorldParamsHotspot}
+                                                    setPlOptions={p.setPlOptions}
+                                                    selectObject={p.selectObject}
+                            />
                             } )
                         }
                     </Col>
                 })
             }
-            <Col sm="4">
-                <InputOnClickOption key={p.getOptionsByObject3D? p.getOptionsByObject3D.name : 'not'} plOptions={p.plOptions} updateObjectSingleData={p.updateObjectSingleData} 
+            <Col sm="4" className="border bg-light">
+                <label className='d-block h5'>Action</label>
+                <InputOnClickOption key={p.getOptionsByObject3D? p.getOptionsByObject3D.name : 'not'} plOptions={p.plOptions} 
                                     currentObject3D={p.currentObject3D}
                                     getOptionsByObject3D={p.getOptionsByObject3D}
                                     onClickOption={p.onClickOption} setOnClickOption={p.setOnClickOption} 
+                                    getCurrentPanoramaParams={p.getCurrentPanoramaParams}
+                                    plOptionsReplaceWorldParamsHotspot={p.plOptionsReplaceWorldParamsHotspot}
+                                    setPlOptions={p.setPlOptions}
+                                    selectObject={p.selectObject}
+                                    setCurrentObject3D={p.setCurrentObject3D}
                 />
             </Col>
         </Row>

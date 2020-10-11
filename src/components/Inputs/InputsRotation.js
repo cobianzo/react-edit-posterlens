@@ -6,10 +6,11 @@ function InputsRotation( p ) {
 
     /** reuse of code by holding the props to export into one var. */
     const props = {
-        updateObjectSingleData: p.updateObjectSingleData,
         getCurrentPanoramaParams: p.getCurrentPanoramaParams,
         currentObject3D: p.currentObject3D,
-        getOptionsByObject3D: p.getOptionsByObject3D,
+        getOptionsByObject3D: p.getOptionsByObject3D, 
+        setPlOptions: p.setPlOptions,
+        plOptionsReplaceWorldParamsHotspot: p.plOptionsReplaceWorldParamsHotspot,
         class: 'col-4 flex-nowrap'
     }
     return (

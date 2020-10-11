@@ -9,6 +9,8 @@ import PanelObjectData_Right from './PanelObjectData_Right';
 import PanelListObjects_Left from './PanelListObjects_Left';
 import PanelPanoramaInfo_Right from './PanelPanoramaInfo_Right';
 
+import { SyncPlOptions__LocalStorage } from '../SyncDataAlongApp'
+
 export default function TopBarButtonsAndPanels( p ) {
     
     return (
@@ -65,7 +67,7 @@ export default function TopBarButtonsAndPanels( p ) {
                 currentPanoParams.initialLookAt = window.pl.getCameraDirection('lookatPoint');
                 currentPanoParams.initialFov = window.pl.viewer.camera.fov;
                 const newOptions = p.plOptionsReplaceWorldParams(currentPanoParams);
-                p.syncPlOptionsAndLocalStorage(newOptions);
+                p.SyncPlOptions__LocalStorage(newOptions);
             } }>
             Set camera view
         </Button>
