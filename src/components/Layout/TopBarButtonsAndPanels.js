@@ -67,7 +67,7 @@ export default function TopBarButtonsAndPanels( p ) {
                 currentPanoParams.initialLookAt = window.pl.getCameraDirection('lookatPoint');
                 currentPanoParams.initialFov = window.pl.viewer.camera.fov;
                 const newOptions = p.plOptionsReplaceWorldParams(currentPanoParams);
-                p.SyncPlOptions__LocalStorage(newOptions);
+                SyncPlOptions__LocalStorage(newOptions, p.setPlOptions);
             } }>
             Set camera view
         </Button>

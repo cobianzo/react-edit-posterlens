@@ -45,5 +45,7 @@
     border: 1px solid magenta
 }
 
-#input-rotationX, #input-rotationY, #input-rotationZ { float: left; }
-#input-rotationX input, #input-rotationY input, #input-rotationZ input { width: 60px }
+
+.input-group.flex-nowrap {
+    justify-content: space-around;
+}

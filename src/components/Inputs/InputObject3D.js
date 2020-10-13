@@ -15,6 +15,13 @@ function InputObject3D( { input, props: p } ) {
     /*  prop: 'rotation.x' , returns 0.54 (the value of currentObject3D.rotation.x) */
     function getCurrentValueFromObject3D(prop) {
         if (!p.currentObject3D) return null;
+        
+        if (prop === 'distance')  // special field. Distance:
+            return parseInt(window.pl.viewer.camera.position.distanceTo(p.currentObject3D.position))
+        
+        if (prop === 'scale.x')  // special field. Distance:
+            return parseInt(p.currentObject3D.scale.x*100)/100
+
         const props = prop.split('.');
         let val = p.currentObject3D;
         props.forEach( theProp => val = val[theProp] );
@@ -36,16 +43,7 @@ function InputObject3D( { input, props: p } ) {
         // do we need to use setCurrentObject3D? Aparently not.
     }
 
-    /*  helper.          Returns the field value, for the selected hotspot in the pl data options. */
-    // TODO: we can use getOptionsByObject3D, which is the same functinoality
-    const getObjectData = function(objectName, dataField, defaultVal) {
-        const currentWorldOptions = p.getCurrentPanoramaParams();
-        let objectHotspotData = currentWorldOptions.hotspots.find( ht => ht.name === objectName );
-        if (!objectHotspotData) return;
-        let data = objectHotspotData[dataField];
-        if (!data) return defaultVal;
-        return data ;
-    }  
+ 
 
     // preparing placeholders. initial value of the input:
     const currentValue = (p.currentObject3D)? getCurrentValueFromObject3D(input.prop) : null;
@@ -55,10 +53,10 @@ function InputObject3D( { input, props: p } ) {
             <InputGroup.Prepend> <InputGroup.Text>{input.label}</InputGroup.Text></InputGroup.Prepend>
             <Form.Control type="range" id={input.prop} name={input.prop} className='range-control'
                 min={input.min} max={input.max} defaultValue={currentValue} step={input.step}
-                onChange={ (e) => {
+                onChange={ input.onChange?? ( (e) => {
                     // update the object 3d to see the change
                     updatePropObject3D(input.prop, e.target.value);
-                } }
+                }) }
                 onMouseUp ={ (e) => {
                     // update the data only when finishing editing
                     SyncObject3d__DataHotspot( { 

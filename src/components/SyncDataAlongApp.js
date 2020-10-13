@@ -32,10 +32,11 @@ export function SyncObject3d__Inputs( p ) {
     
     const formsSync = document.querySelectorAll('[sync-3d]');
     
-    // for every input, we grab its data from plOptions and update the input value.
+    // for every input, we grab its data `option` from the plOptions hotspot and update the input value.
     formsSync.forEach( formEl => {
       const option = formEl.getAttribute('sync-3d');
       let value = (typeof options[option] !== 'undefined' )? options[option] : '';
+      
       // special case. The option is an object (rot.0)
       if (option.includes('.')) {
         const fields = option.split('.');
@@ -55,6 +56,10 @@ export function SyncObject3d__Inputs( p ) {
       if (option === 'onClickAction') { // special case. InputOnClickOption: This field handles a state that needs to be updated
         p.setOnClickOption(value);
       }
+
+      // special case: distance
+      if (option === 'distance')
+        formEl.querySelector('input').value = window.pl.viewer.camera.position.distanceTo(p.currentObject3D.position)
     });
 }
 

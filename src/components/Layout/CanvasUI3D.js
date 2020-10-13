@@ -4,6 +4,23 @@ import Row from 'react-bootstrap/Row'
 import {reactGetMouse3Dposition} from '../../helpers';
 import { SyncObject3d__DataHotspot } from '../SyncDataAlongApp'
 
+
+// move an object closer or farther from the camera.
+export function z_move(object3D, direction = 'close'){
+  let offset = 1.02;
+  if (direction === 'close') offset = 1/offset;
+              
+  var newPos = object3D.position.clone();
+  newPos.x *= offset; newPos.y *= offset; newPos.z *= offset;
+  const distance = window.pl.viewer.camera.position.distanceTo(newPos);
+  if ( (direction !== 'close' && distance > 500) || (direction === 'close' && distance < 40)) {
+      console.warn('we cant move that limit. Its out of 40 - 500m');
+      return
+  }
+  window.pl.setObjectPos(object3D, [newPos.x, newPos.y, newPos.z]);
+}
+
+
 /**
  * The div placeholder where posterlens.js loads the threejs panolens panorama
  */
@@ -66,7 +83,6 @@ function CanvasUI3D( p ) {
                   plOptionsReplaceWorldParamsHotspot: p.plOptionsReplaceWorldParamsHotspot} );
       window.selectedObj = null;
   };
-
 
     return (
         <Row>

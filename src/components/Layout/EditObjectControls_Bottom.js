@@ -7,6 +7,7 @@ import InputsRotation from '../Inputs/InputsRotation';
 
 import { SyncObject3d__DataHotspot } from '../SyncDataAlongApp'
 import { reactGetMouse3Dposition } from '../../helpers';
+import { z_move } from './CanvasUI3D';
 
 // bootstrap 4 elements
 import Col from 'react-bootstrap/Col';
@@ -25,23 +26,24 @@ function EditObjectControls_Bottom( p ) {
 
     useEffect(() => { 
         if (!window.pl) return;
-        document.addEventListener('keydown', (event) => { handlerScaleRotateObject(event) } );
-        
+        document.addEventListener('keydown', (event) => { handlerScaleRotateObject(event) } );    
     }, [] );
 
     const handlerScaleRotateObject = function(event) {
         // we cant use the state currentObject3D, because it will not get the latest value. It will be initialzied to the time of creation og this handler
         if (!window.lastSelectedObj) return;
         if (event.ctrlKey) {
+            let SCALE_FACTOR    = p.editParams.SCALE_FACTOR * ( event.shiftKey? 2 : 1);
+            let ROTATE_DEG      = p.editParams.ROTATE_DEG * ( event.shiftKey? 2 : 1);     
             switch (event.key) {
-                case '+': window.lastSelectedObj.scale.set( window.lastSelectedObj.scale.x * p.editParams.SCALE_FACTOR, window.lastSelectedObj.scale.y * p.editParams.SCALE_FACTOR, window.lastSelectedObj.scale.z * p.editParams.SCALE_FACTOR );      break;
-                case '-': window.lastSelectedObj.scale.set( window.lastSelectedObj.scale.x / p.editParams.SCALE_FACTOR, window.lastSelectedObj.scale.y / p.editParams.SCALE_FACTOR, window.lastSelectedObj.scale.z / p.editParams.SCALE_FACTOR );      break;
-                case 'r': window.lastSelectedObj.rotateZ(p.editParams.ROTATE_DEG);  break;
-                case 't': window.lastSelectedObj.rotateZ(-p.editParams.ROTATE_DEG);  break;
-                case 'f': window.lastSelectedObj.rotateY(p.editParams.ROTATE_DEG);  break;
-                case 'g': window.lastSelectedObj.rotateY(-p.editParams.ROTATE_DEG);  break;
-                case 'v': window.lastSelectedObj.rotateX(p.editParams.ROTATE_DEG);  break;
-                case 'b': window.lastSelectedObj.rotateX(-p.editParams.ROTATE_DEG);  break;
+                case '+': window.lastSelectedObj.scale.set( window.lastSelectedObj.scale.x * SCALE_FACTOR, window.lastSelectedObj.scale.y * SCALE_FACTOR, window.lastSelectedObj.scale.z * SCALE_FACTOR );      break;
+                case '-': window.lastSelectedObj.scale.set( window.lastSelectedObj.scale.x / SCALE_FACTOR, window.lastSelectedObj.scale.y / SCALE_FACTOR, window.lastSelectedObj.scale.z / SCALE_FACTOR );      break;
+                case 'r': window.lastSelectedObj.rotateZ(ROTATE_DEG);  break;
+                case 't': window.lastSelectedObj.rotateZ(-ROTATE_DEG);  break;
+                case 'f': window.lastSelectedObj.rotateY(ROTATE_DEG);  break;
+                case 'g': window.lastSelectedObj.rotateY(-ROTATE_DEG);  break;
+                case 'v': window.lastSelectedObj.rotateX(ROTATE_DEG);  break;
+                case 'b': window.lastSelectedObj.rotateX(-ROTATE_DEG);  break;
                 case '4': z_move(window.lastSelectedObj, 'close'); break;
                 case '5': z_move(window.lastSelectedObj, 'far'); break;
                 default:
@@ -63,20 +65,6 @@ function EditObjectControls_Bottom( p ) {
         }
     }
 
-    // move an object closer or farther from the camera.
-    function z_move(object3D, direction = 'close'){
-        let offset = 1.02;
-        if (direction === 'close') offset = 1/offset;
-                    
-        var newPos = object3D.position.clone();
-        newPos.x *= offset; newPos.y *= offset; newPos.z *= offset;
-        const distance = window.pl.viewer.camera.position.distanceTo(newPos);
-        if ( (direction !== 'close' && distance > 500) || (direction === 'close' && distance < 40)) {
-            console.warn('we cant move that limit. Its out of 40 - 500m');
-            return
-        }
-        window.pl.setObjectPos(object3D, [newPos.x, newPos.y, newPos.z]);
-    }
 
     
     const panoList = {}; // for the `link` option below
@@ -112,7 +100,7 @@ function EditObjectControls_Bottom( p ) {
       <Container className="edit-panel">
         { /* The name of the object */ }
         {p.currentObject3D? 
-        <Row>
+        <Row className='no-gutters' style={{ marginTop: '-20px' }}>
             <InputData   input={ { option: 'name', type: 'input', label:'', active: [ 'pl_poster3d', 'pl_text-2d', 'pl_text-3d'] } } 
                             currentObject3D={p.currentObject3D}
                             getOptionsByObject3D={p.getOptionsByObject3D} 
@@ -121,11 +109,11 @@ function EditObjectControls_Bottom( p ) {
                             setPlOptions={p.setPlOptions}
                             selectObject={p.selectObject}
                             setCurrentObject3D={p.setCurrentObject3D}
-                            class="col-3"
+                            class="col-5 mb-3"
                             />
 
         { /* The inputs in sync with the 3d object */ }
-            <div className='col-9'>
+            <div className='col-7'>
                 <InputsRotation  class="row"
                             getCurrentPanoramaParams={p.getCurrentPanoramaParams}
                             currentObject3D={p.currentObject3D} setPlOptions={p.setPlOptions}

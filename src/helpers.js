@@ -8,7 +8,7 @@ export function round2(fl) {
 
 // x,y,z of mouse inside the 3d world. posterlens has this functions, but it doesnt work if I call it in onmousemove.
 export function reactGetMouse3Dposition(event, p ) {
-    /* setEditParams, */
+    /* { setEditParams, editParams } */
     if (!window.pl) return
     const v = window.pl.viewer;
     if (!v) { console.warn('Cant retrieve mouse pos, not viewer defined'); return; }

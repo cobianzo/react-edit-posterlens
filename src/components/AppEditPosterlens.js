@@ -7,6 +7,7 @@ import CanvasUI3D from './Layout/CanvasUI3D';
 import Widgets from './Widgets';
 
 import { SyncObject3d__Inputs, SyncPlOptions__LocalStorage} from './SyncDataAlongApp'
+import { z_move } from './Layout/CanvasUI3D';
 
 // Bootstrap 4
 import Container from 'react-bootstrap/Container';
@@ -92,13 +93,15 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
       const lso = localStorage.getItem('lastSelectedObj.name');
       if (lso) {
         const selObj = window.pl.getObjectByName(lso);
-        if (selObj) setCurrentObject3D(selObj);
+        if (selObj) {
+          selectObject(selObj)
+        }
       }
       // Debug with chrome three inspector.
       window.scene = window.pl.viewer.getScene();
+      if (isEditMode) window.stopAllAnimations(window.pl.viewer);
 
-     if (isEditMode) window.stopAllAnimations(window.pl.viewer);
-
+      
     });
   }
 
@@ -114,6 +117,10 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
     createViewer();
     setCountRestarts(countRestarts + 1);
     // and widgets are rerenderr because its key is associated to countRestarts, so they are loaded ok.
+    setTimeout( () => { // we need this just to refresh otherwise the object cant be selected... dont know...
+      document.querySelector('#input-name form').dispatchEvent(new Event("submit"));
+    }, 500);
+    
   }
 
   // helpers
@@ -176,13 +183,17 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
     if (!currentObject3D) return;
     const objectCurrentParams = Object.assign({}, getOptionsByObject3D(currentObject3D));
     const currentWorldParams  = getCurrentPanoramaParams();
-    objectCurrentParams.name = "cloned_"+ objectCurrentParams.name;
-    objectCurrentParams.pos = [ objectCurrentParams.pos[0], objectCurrentParams.pos[1] + 50, objectCurrentParams.pos[2]]
+    const newName             = "cloned_"+ objectCurrentParams.name;
+    objectCurrentParams.name  = newName;
+    objectCurrentParams.pos = [ parseFloat(objectCurrentParams.pos[0]) + 50, parseFloat(objectCurrentParams.pos[1]) + 50, objectCurrentParams.pos[2]]
     currentWorldParams.hotspots.push(objectCurrentParams);
     const newPlOptions = plOptionsReplaceWorldParams(currentWorldParams);
+    
     SyncPlOptions__LocalStorage(newPlOptions, setPlOptions);
     // we need to restart the viewer to create it.
+    localStorage.setItem('lastSelectedObj.name', newName);
     restartViewer();
+
   }
 
   // shows modal with all the options
@@ -213,7 +224,7 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
     <Container className={ 'wrapper border pt-2' + (editParams.isExpertMode? ' expert-mode' : ' no-expert-mode') } style={{ maxWidth:'1200px' }}>
       
       <TopBarButtonsAndPanels currentObject3D={currentObject3D} setCurrentObject3D={setCurrentObject3D} getCurrentPanoramaParams={getCurrentPanoramaParams} 
-                              plOptions={plOptions} editParams={editParams} selectObject={selectObject}
+                              plOptions={plOptions} setPlOptions={setPlOptions} editParams={editParams} selectObject={selectObject}
                              plOptionsReplaceWorldParams={plOptionsReplaceWorldParams}
                              restartViewer={restartViewer} removeCurrentObject={removeCurrentObject} setAppMode={setAppMode} countRestarts={countRestarts} 
                              exportToTextarea={exportToTextarea} cloneCurrentObject={cloneCurrentObject} />
