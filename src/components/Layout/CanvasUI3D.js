@@ -57,6 +57,7 @@ function CanvasUI3D( p ) {
       const intersects = v.raycaster.intersectObject( v.panorama, true );
       const theObj = intersects[0]? intersects[0].object : null ;
       if (!theObj || !theObj.type?.startsWith('pl_')) return;
+      if (theObj.isLocked) return; 
 
       theObj.distance = v.camera.position.distanceTo(theObj.position);
       window.selectedObj = theObj;

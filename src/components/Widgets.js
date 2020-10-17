@@ -36,7 +36,10 @@ function Widgets( p ) {
                 });
                 //shabby way to add a class to this btn. (panolens doesnt do it)
                 const justCreatedBtn = window.pl.el? window.pl.el.querySelector('.pl-widgets > span:last-child') : null;
-                if (justCreatedBtn) justCreatedBtn.classList.add('widget-btn-'+type);
+                if (justCreatedBtn) {
+                    justCreatedBtn.classList.add('widget');
+                    justCreatedBtn.classList.add('widget-btn-'+type);
+                }
                 
         })
     }
@@ -89,7 +92,7 @@ function Widgets( p ) {
 
         // posterlens fn
         // update states object 3d in viewer & object params for posterlens
-        params.callbackFn = mesh => p.setCurrentObject3D(mesh);        
+        params.creationCallback = mesh => p.selectObject(mesh);
         window.pl.createNewObjectFromParams(v.panorama, params);
 
         

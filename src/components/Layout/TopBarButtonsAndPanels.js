@@ -25,11 +25,11 @@ export default function TopBarButtonsAndPanels( p ) {
                                 setCurrentObject3D={p.setCurrentObject3D} getCurrentPanoramaParams={p.getCurrentPanoramaParams} /> : null }
         
 
-
         { p.plOptions && p.editParams.isExpertMode ? 
             <React.Fragment>
+
                 <Button className="btn-sm" onClick={ e => p.restartViewer() }>
-                    RESET <span className="badge">{p.countRestarts}</span>
+                    Restart <span className="badge">{p.countRestarts}</span>
                 </Button>        
                 <Button className="btn btn-danger btn-sm" onClick={ (e) => { localStorage.setItem('pl.o', null); p.restartViewer(); }  }>
                     Clear cache

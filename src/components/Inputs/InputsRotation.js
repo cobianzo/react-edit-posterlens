@@ -1,10 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 
 import InputObject3D from './InputObject3D';
-import { SyncObject3d__DataHotspot } from '../SyncDataAlongApp'
-
-import Form from 'react-bootstrap/Form';
-import InputGroup from 'react-bootstrap/InputGroup';
 
 
 function InputsRotation( p ) {
@@ -12,14 +8,16 @@ function InputsRotation( p ) {
     /** reuse of code by holding the props to export into one var. */
     const props = {
         getCurrentPanoramaParams: p.getCurrentPanoramaParams,
-        currentObject3D: p.currentObject3D,
+        currentObject3D: p.currentObject3D, setCurrentObject3D: p.setCurrentObject3D, selectObject: p.selectObject,
         getOptionsByObject3D: p.getOptionsByObject3D, 
         setPlOptions: p.setPlOptions,
         plOptionsReplaceWorldParamsHotspot: p.plOptionsReplaceWorldParamsHotspot,
         class: 'col-4 flex-nowrap'
     }
+
+
     return (
-        <div className={ p.class?? 'ww' }>
+        <div className={ p.class?? 'nothing' }>
             <InputObject3D input={ {
                                 label: 'RotX',
                                 prop: 'rotation.x',
@@ -61,7 +59,7 @@ function InputsRotation( p ) {
                             field: 'distance',
                             default: [],
                             min: 1,
-                            max: 499,
+                            max: 460,
                             step: 1,
                             onChange: ((e) => {
                                 // update the object 3d to see the change
@@ -78,12 +76,17 @@ function InputsRotation( p ) {
                             field: 'scale',
                             default: [],
                             min: p.currentObject3D.type === 'pl_text-3d'? 0.01 : 1,
-                            max: p.currentObject3D.type === 'pl_text-3d'? 3 : 100,
+                            max: p.currentObject3D.type === 'pl_text-3d'? 3 : (p.currentObject3D.isSprite? 400 : 100),
                             step: p.currentObject3D.type === 'pl_text-3d'? 0.01 : 1,
                             onChange: ((e) => {
                                 // update the object 3d to see the change
-                                p.currentObject3D.scale.set( e.target.value,e.target.value,e.target.value );
-                            })
+                                p.currentObject3D.scale.x = e.target.value;
+                                p.currentObject3D.scale.y = e.target.value;
+                                p.currentObject3D.scale.z = e.target.value;
+                                // SyncInputFieldset__DataHotspot( p.currentObject3D.name, { 'scale': e.target.value }, true, props);
+                                return false;
+                            }),
+                           // onMouseUp: ( e => { return false; } )
                         } }
                         props={props}
                         />

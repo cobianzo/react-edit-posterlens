@@ -46,7 +46,7 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
     setCountRestarts(1); // small helper
   }, []);
   
-  // called on init and restart
+  // called on init and restart: WATCH countRestarts
   useEffect(() => {
     // initialize this react plugin to make that viewer interactive.
     if (window.pl)
@@ -54,7 +54,7 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
         setIsEditMode(true);
   }, [countRestarts]);
 
-  /* Watch onchange on currentObject3D selection in the UI.
+  /* WATCH currentObject3D: Onchange on currentObject3D selection in the UI.
   *   we basically update the inputs with the values inside the plOptions for that hotspot 
   */
   useEffect( () => {    if (!currentObject3D) return;
@@ -63,7 +63,16 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
     
     /* Object 3D ====> Inputs  !SHABBY WAY! */
     SyncObject3d__Inputs( { currentObject3D, getOptionsByObject3D, setOnClickOption } );   
-    // currentObject3D.material.blending = 2;
+    const originalBlend = currentObject3D.material.blending;
+    const originalColor = currentObject3D.material.color;
+    currentObject3D.material.blending = 2;
+    if (currentObject3D.type === 'pl_text-3d') currentObject3D.material.wireframe = true;
+    currentObject3D.material.color = { r:0, g:1, b:0};
+    setTimeout(()=> {
+      currentObject3D.material.blending = originalBlend;
+      currentObject3D.material.color = originalColor;
+      currentObject3D.material.wireframe = false;
+    }, 800 );
   }, [currentObject3D])
   
    
@@ -83,7 +92,9 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
     if (!posterlensConfig) {
       console.error('No data loaded. Cant initialize');
       return;
-    }
+    } 
+    
+    window.plEditMode = true; // this avoid animations while editing the pano
 
     // CALL POSTERLENS
     window.pl = document.querySelector('#'+editParams.POSTERLENS_CONTAINER_ID).posterlens( posterlensConfig );
@@ -113,12 +124,19 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
     destroyViewer();
     setPlOptions(null);
     setIsEditMode(false);
+    localStorage.setItem('lastCameraLookat', window.pl.getCameraDirection('lookatPoint'));
     delete(window.pl);
     createViewer();
     setCountRestarts(countRestarts + 1);
     // and widgets are rerenderr because its key is associated to countRestarts, so they are loaded ok.
+    // better with ? window.pl.viewer.panorama.addEventListener('load', () => {
     setTimeout( () => { // we need this just to refresh otherwise the object cant be selected... dont know...
-      document.querySelector('#input-name form').dispatchEvent(new Event("submit"));
+      const input = document.querySelector('#input-name form');
+        if (input) input.dispatchEvent(new Event("submit"));
+      let lastCameraLookat = localStorage.getItem('lastCameraLookat').split(',')
+      lastCameraLookat = lastCameraLookat.map( i => parseInt(i) ); // needed
+      window.pl.viewer.setControlCenter(new window.THREE.Vector3( ...lastCameraLookat ));
+      localStorage.removeItem("lastCameraLookat"); 
     }, 500);
     
   }
@@ -223,7 +241,7 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
   return (     
     <Container className={ 'wrapper border pt-2' + (editParams.isExpertMode? ' expert-mode' : ' no-expert-mode') } style={{ maxWidth:'1200px' }}>
       
-      <TopBarButtonsAndPanels currentObject3D={currentObject3D} setCurrentObject3D={setCurrentObject3D} getCurrentPanoramaParams={getCurrentPanoramaParams} 
+      <TopBarButtonsAndPanels data={data} currentObject3D={currentObject3D} setCurrentObject3D={setCurrentObject3D} getCurrentPanoramaParams={getCurrentPanoramaParams} 
                               plOptions={plOptions} setPlOptions={setPlOptions} editParams={editParams} selectObject={selectObject}
                              plOptionsReplaceWorldParams={plOptionsReplaceWorldParams}
                              restartViewer={restartViewer} removeCurrentObject={removeCurrentObject} setAppMode={setAppMode} countRestarts={countRestarts} 
@@ -250,7 +268,7 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
 
       { isEditMode? <Widgets plOptions={plOptions} isEditMode={isEditMode} setIsEditMode={setIsEditMode}  
                               setCurrentObject3D={setCurrentObject3D} plOptions={plOptions}
-                              key={countRestarts} restartViewer={restartViewer} 
+                              key={countRestarts} restartViewer={restartViewer} selectObject={selectObject}
                               plOptionsReplaceWorldParams={plOptionsReplaceWorldParams}
                               getCurrentPanoramaParams={getCurrentPanoramaParams} setPlOptions={setPlOptions}
                               

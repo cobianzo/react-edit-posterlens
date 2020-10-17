@@ -27,6 +27,11 @@ import { round2 } from '../helpers'
   */
 export function SyncObject3d__Inputs( p ) {
 
+    /**
+     * currentObject3D
+     * getOptionsByObject3D
+     * setOnClickOption
+     */
     // grab the options for the current selected object.
     const options = p.getOptionsByObject3D(p.currentObject3D);
     
@@ -53,7 +58,7 @@ export function SyncObject3d__Inputs( p ) {
       if (formEl.querySelector('input[type="checkbox"]'))
         formEl.querySelector('input[type="checkbox"]').checked = value? true : false ;
 
-      if (option === 'onClickAction') { // special case. InputOnClickOption: This field handles a state that needs to be updated
+      if (option === 'onClickAction' && p.setOnClickOption ) { // special case. InputOnClickOption: This field handles a state that needs to be updated
         p.setOnClickOption(value);
       }
 
@@ -68,6 +73,8 @@ export function SyncObject3d__Inputs( p ) {
   // =======================> Options pl
   // WHERE: when finishing dragging an object in UI, change its properties with keyboard shortcut, or change properies from InputsRotation
   export function SyncObject3d__DataHotspot( p ) {
+  
+
     const object3D = p.object3D;
     const objectCurrentParams = p.getOptionsByObject3D(object3D); // worldParams.hotspots[objectHotspotIndex];
     const objectNewParams     = { ...objectCurrentParams };
@@ -82,6 +89,9 @@ export function SyncObject3d__Inputs( p ) {
     const newOptions = p.plOptionsReplaceWorldParamsHotspot(object3D.name, objectNewParams);
     SyncPlOptions__LocalStorage(newOptions, p.setPlOptions);
     
+    if (p.regenerate)
+        regenerateObject(object3D, objectNewParams, (obj) => { p.selectObject(obj) } );
+
     return objectNewParams;
 
   }
@@ -112,16 +122,7 @@ export function SyncObject3d__Inputs( p ) {
     // regenerate the 3d object (remove and generate)
     const object = window.pl.getObjectByName(name);
     if (regenerate) {
-      if (name && window.pl.viewer.panorama && objectData ) {
-        window.pl.viewer.panorama.remove( object );
-        window.pl.createNewObjectFromParams(window.pl.viewer.panorama, objectData); // recreate the 3d in the viewer
-        const newObject = window.pl.getObjectByName(name);
-        setTimeout(()=> p.selectObject(newObject), 500);
-        
-      }
-      else {        
-        p.selectObject(object);
-      }
+      regenerateObject(object, objectData, (obj) => { p.selectObject(obj) } );
     } // end regenrate
 
     // special field: name. TODO: check name is not repeated.
@@ -130,4 +131,21 @@ export function SyncObject3d__Inputs( p ) {
       p.setCurrentObject3D(object);
     }
 
+  }
+
+
+  // helper
+  function regenerateObject(object, objectData = null, callbackFn = null) {
+    if (!object) return false;
+    const name = object.name;
+    // if (!objectData) objectData = p.getOptionsByObject3D(object)
+    if (window.pl.viewer.panorama && objectData ) {
+        window.pl.viewer.panorama.remove( object );
+        objectData.creationCallback = callbackFn;
+        window.pl.createNewObjectFromParams(window.pl.viewer.panorama, objectData); // recreate the 3d in the viewer
+      }
+      else {
+        if (callbackFn)
+            callbackFn(object);
+      }
   }

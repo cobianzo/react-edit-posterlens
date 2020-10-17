@@ -18,7 +18,7 @@ export default function InputData(p) {
                     setPlOptions: p.setPlOptions,
                     selectObject: p.selectObject,
                     setCurrentObject3D: p.setCurrentObject3D }
-
+ 
     // udpated fied p.input.option with the value. Some fields have special treatment
     const wrapperUpdateObjectSingleData = function (value) {
         let theValue = value === p.input.deleteIfValue ? null : value; // with this we will remove the option from the params.
@@ -30,7 +30,7 @@ export default function InputData(p) {
         let regenerate = ['name'].includes(p.input.option)? false : true; // regenerate bu default , except in some, like 'name'
         SyncInputFieldset__DataHotspot( p.currentObject3D.name, fieldPair, regenerate, syncParams);
         setInfoMsg('Applied!');  setTimeout(()=>setInfoMsg(''), 1000);
-
+        p.selectObject(window.lastSelectedObj);
     }
 
     const viewInput = function() {
@@ -60,18 +60,19 @@ export default function InputData(p) {
                 <InputGroup.Append> <InputGroup.Text>{currentValue}</InputGroup.Text></InputGroup.Append>
                 </InputGroup>
             case "input":
+            case "textarea":
                 return <form 
                             onSubmit={ (e) => { e.preventDefault(); 
                                     wrapperUpdateObjectSingleData(e.currentTarget.querySelector('input').value) } }
                         >
                     <InputGroup>
                     {p.input.label ? <InputGroup.Prepend> <InputGroup.Text>{p.input.label}</InputGroup.Text></InputGroup.Prepend> : null }
-                        <FormControl as='input' defaultValue={currentValue} onChange={ e => setInfoMsg('Enter to save') }  placeholder={ p.input.placeholder?? ' '} />
-                        <InputGroup.Append onClick={ (e) => infoMsg ? wrapperUpdateObjectSingleData(e.currentTarget.closest('form').querySelector('input').value) : false } >
+                        <FormControl as={p.input.type} defaultValue={currentValue} onChange={ e => setInfoMsg('Enter to save') }  placeholder={ p.input.placeholder?? ' '} />
+                        <InputGroup.Append onClick={ (e) => infoMsg ? wrapperUpdateObjectSingleData(e.currentTarget.closest('form').querySelector(p.input.type).value) : false } >
                             <InputGroup.Text> { infoMsg || currentValue  } </InputGroup.Text>
                         </InputGroup.Append>
                     </InputGroup>
-                </form>
+                </form>             
             case "number":
                 return  <form onSubmit={ (e) => { e.preventDefault(); wrapperUpdateObjectSingleData(e.currentTarget.querySelector('input').value) } }
                              >

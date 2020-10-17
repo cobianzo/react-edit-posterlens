@@ -19,19 +19,37 @@
     max-width: 200px;
     z-index: 9;
 }
+.list-objects ul {
+    max-height: 500px;
+    overflow: scroll;
+}
 .list-objects li:hover {
     border: 1px solid #E39300;
 }
-.list-objects li.active {
+.list-objects li.is-locked {
+    opacity: 0.7;
+}
+.list-objects li .object-selected {
     background-color: #FFaa33;
+}
+
+/* panolens widgets */
+.widget {
+    height:50px !important;
+    width: 100px !important;
+    margin: 0 5px !important; 
+    background-size: contain !important;
+    padding: 5px !important; 
 }
 
 /* Inputs in general */
 
 /* number input */
 .form-check-input[type="number"] {
-    width: 120px;
+    width: 80px;
 }
+#input-rotationX, #input-rotationY, #input-rotationZ { float: left;}
+#input-animatedMap, #input-animatedMapSpeed { float: left;}
 
 .no-expert-mode .number-type.no-editing .input-group-append,
 .no-expert-mode .input-type.no-editing .input-group-append,
@@ -49,3 +67,4 @@
 .input-group.flex-nowrap {
     justify-content: space-around;
 }
+

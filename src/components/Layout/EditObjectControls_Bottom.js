@@ -35,17 +35,27 @@ function EditObjectControls_Bottom( p ) {
         if (event.ctrlKey) {
             let SCALE_FACTOR    = p.editParams.SCALE_FACTOR * ( event.shiftKey? 2 : 1);
             let ROTATE_DEG      = p.editParams.ROTATE_DEG * ( event.shiftKey? 2 : 1);     
+            let MOVE            = 0.5 * ( event.shiftKey? 6 : 1);
+            
+            if (window.lastSelectedObj.material.type === "SpriteMaterial") {
+                // for a sptrite some actions break it.
+                if (!['4','5','+','-'].includes(event.key)) return
+            }
             switch (event.key) {
                 case '+': window.lastSelectedObj.scale.set( window.lastSelectedObj.scale.x * SCALE_FACTOR, window.lastSelectedObj.scale.y * SCALE_FACTOR, window.lastSelectedObj.scale.z * SCALE_FACTOR );      break;
                 case '-': window.lastSelectedObj.scale.set( window.lastSelectedObj.scale.x / SCALE_FACTOR, window.lastSelectedObj.scale.y / SCALE_FACTOR, window.lastSelectedObj.scale.z / SCALE_FACTOR );      break;
-                case 'r': window.lastSelectedObj.rotateZ(ROTATE_DEG);  break;
-                case 't': window.lastSelectedObj.rotateZ(-ROTATE_DEG);  break;
-                case 'f': window.lastSelectedObj.rotateY(ROTATE_DEG);  break;
-                case 'g': window.lastSelectedObj.rotateY(-ROTATE_DEG);  break;
-                case 'v': window.lastSelectedObj.rotateX(ROTATE_DEG);  break;
-                case 'b': window.lastSelectedObj.rotateX(-ROTATE_DEG);  break;
+                case 'r': window.lastSelectedObj.rotation.x = parseInt(100*(window.lastSelectedObj.rotation.x + ROTATE_DEG))/100;  break;
+                case 't': window.lastSelectedObj.rotation.x = parseInt(100*(window.lastSelectedObj.rotation.x - ROTATE_DEG))/100;  break;
+                case 'f': window.lastSelectedObj.rotation.y = parseInt(100*(window.lastSelectedObj.rotation.y + ROTATE_DEG))/100;  break;
+                case 'g': window.lastSelectedObj.rotation.y = parseInt(100*(window.lastSelectedObj.rotation.y - ROTATE_DEG))/100;  break;
+                case 'v': window.lastSelectedObj.rotation.z = parseInt(100*(window.lastSelectedObj.rotation.z + ROTATE_DEG))/100;  break;
+                case 'b': window.lastSelectedObj.rotation.z = parseInt(100*(window.lastSelectedObj.rotation.z - ROTATE_DEG))/100;  break;
                 case '4': z_move(window.lastSelectedObj, 'close'); break;
                 case '5': z_move(window.lastSelectedObj, 'far'); break;
+                case 'w': case 'W': window.lastSelectedObj.translateY( MOVE );  break;
+                case 's': case 'S': window.lastSelectedObj.translateY( -MOVE );  break;
+                case 'd': case 'D': window.lastSelectedObj.translateX( MOVE );  break;
+                case 'a': case 'A': window.lastSelectedObj.translateX( -MOVE );  break;
                 default:
                     break;
             }
@@ -87,15 +97,19 @@ function EditObjectControls_Bottom( p ) {
             { option: 'opacity', type: 'number', step: 0.05, min:0, max:1, label:'Opacity', active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '1' },
         ],
         [
-        { option: 'animatedMap', type: 'number', label:'frames map', active: [ 'pl_poster3d' ], deleteIfValue: '' },
+        { option: 'animatedMap', type: 'number', label:'frames', active: [ 'pl_poster3d' ], deleteIfValue: '' },
         { option: 'animatedMapSpeed', type: 'number', label:'speed', active: [ 'pl_poster3d' ], deleteIfValue: '' },
-        { option: 'rotationX', type: 'number', label:'Rotate animat', placeholder: 'x', step: 100, active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
+        { option: 'rotationX', type: 'number', label:'℺ animat', placeholder: 'x', step: 100, active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
         { option: 'rotationY', type: 'number', label:'', placeholder: 'y',  step: 100, active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
         { option: 'rotationZ', type: 'number', label:'', placeholder: 'z',  step: 100, active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
         { option: 'animated', type: 'select', label:'Glow animation', options: { 'always' : 'always', 'only on hover' : 'hover' }, active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
         { option: 'popupWhenVisible', type: 'number', step: 10, label:'Pops up when in camera', active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
         ]
     ];
+    const inputsCol3 = [
+        { option: 'hoverText', type: 'textarea', label:'hoverText', deleteIfValue: '', active: [ 'pl_poster3d', 'pl_text-2d', 'pl_text-3d'] },
+        { option: 'hoverTextClass', type: 'select', options: { type1 : 'type1' }, label:'Hover box style', active: [ 'pl_text-2d', 'pl_poster3d', 'pl_text-3d'], deleteIfValue: '' },
+    ]
     return (
       <Container className="edit-panel">
         { /* The name of the object */ }
@@ -167,6 +181,17 @@ function EditObjectControls_Bottom( p ) {
                                     selectObject={p.selectObject}
                                     setCurrentObject3D={p.setCurrentObject3D}
                 />
+
+                { inputsCol3.map( (input, i) => <InputData  input={input} key={'input-3rd-column-' + i }
+                                    currentObject3D={p.currentObject3D}
+                                    getOptionsByObject3D={p.getOptionsByObject3D}
+                                    onClickOption={p.onClickOption} setOnClickOption={p.setOnClickOption} 
+                                    getCurrentPanoramaParams={p.getCurrentPanoramaParams}
+                                    plOptionsReplaceWorldParamsHotspot={p.plOptionsReplaceWorldParamsHotspot}
+                                    setPlOptions={p.setPlOptions}
+                                    selectObject={p.selectObject}
+                                    setCurrentObject3D={p.setCurrentObject3D} /> ) }
+                
             </Col>
         </Row>
         

@@ -34,12 +34,11 @@ function InputObject3D( { input, props: p } ) {
         const dataValue = parseInt(val * 100)/100;
         if (!p.currentObject3D) return null;
         const props = prop.split('.');
-        const newObject = p.currentObject3D; 
         // shabby way, but it accepts two levels of depth in the props
         if (props.length === 1) 
-            newObject[props[0]] = dataValue;
+            p.currentObject3D[props[0]] = dataValue;
         else 
-            newObject[props[0]][props[1]] = dataValue; // updates currentobject3d.rotation.x = dataValue
+            p.currentObject3D[props[0]][props[1]] = dataValue; // updates currentobject3d.rotation.x = dataValue
         // do we need to use setCurrentObject3D? Aparently not.
     }
 
@@ -57,15 +56,20 @@ function InputObject3D( { input, props: p } ) {
                     // update the object 3d to see the change
                     updatePropObject3D(input.prop, e.target.value);
                 }) }
-                onMouseUp ={ (e) => {
+                onMouseUp ={ input.onMouseUp?? ((e) => {
                     // update the data only when finishing editing
+                    if (input.onChange) input.onChange(e);
                     SyncObject3d__DataHotspot( { 
-                        object3D: window.lastSelectedObj,
+                        object3D: p.currentObject3D,
                         getOptionsByObject3D: p.getOptionsByObject3D, 
                         setPlOptions: p.setPlOptions,
-                        plOptionsReplaceWorldParamsHotspot: p.plOptionsReplaceWorldParamsHotspot} );
+                        selectObject: p.selectObject,
+                        plOptionsReplaceWorldParamsHotspot: p.plOptionsReplaceWorldParamsHotspot,
+                    
+                    } ) ;
+                    
                     // updateDataObject(input.prop, e.target.value);
-                } }
+                } ) }
             /> 
             <InputGroup.Append> <InputGroup.Text>{ getCurrentValueFromObject3D(input.prop) }</InputGroup.Text></InputGroup.Append>
         </InputGroup>

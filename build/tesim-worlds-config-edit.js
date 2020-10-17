@@ -12,8 +12,9 @@ data = {
       },
       "hotspots": [
         {
-          "name": "mujer",
+          "name": "mujeres",
           "type": "poster3d",
+          "hoverText": "Esto se puede considerar hover",
           "pos": [
             "-6.45",
             "-19.16",
