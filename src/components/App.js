@@ -21,11 +21,11 @@ export default function App() {
   const isEditModeDefault = window.location.hash === '#edit' || isAppAsWidget;
   const [appAsWidget, setAppAsWidget] = useState(isAppAsWidget);
   const [appMode, setAppMode] = useState(isEditModeDefault? 'edit' : 'demo');
-  
+  const codeValidation = window.codeValidation;  
   var data = window.data; // defined outside react, in the html calling this app
   /* ------------------------ --------------------------- */
 
-  return appMode === 'edit' ?  <AppEditPosterlens data={data} setAppMode={setAppMode} appAsWidget={appAsWidget} /> : 
+  return appMode === 'edit' ?  <AppEditPosterlens data={data} setAppMode={setAppMode} appAsWidget={appAsWidget} codeValidation={codeValidation} /> : 
                                <AppDemoPosterlens data={data} setAppMode={setAppMode} appAsWidget={appAsWidget} />;
   
 }

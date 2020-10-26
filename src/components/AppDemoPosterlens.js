@@ -22,6 +22,8 @@ function AppDemoPosterlens( { data, setAppMode, appAsWidget } ) {
         console.error('No data loaded. Cant initialize');
         return;
         }
+
+        window.plEditMode = false;
         // CALL POSTERLENS
         window.pl = document.querySelector('#posterlens-container').posterlens( data );
         window.pl.viewer.panorama.addEventListener('load', (panolensPanoInstance) => {

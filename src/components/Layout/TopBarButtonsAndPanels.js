@@ -1,4 +1,6 @@
 import React from 'react'
+import CryptoJS from "react-native-crypto-js";
+
 /**
  * Panels and Buttons on top of the Canvas3D UI. 
  */
@@ -13,6 +15,7 @@ import { SyncPlOptions__LocalStorage } from '../SyncDataAlongApp'
 
 export default function TopBarButtonsAndPanels( p ) {
     
+
     return (
     <Row className="top-buttons">
         { p.currentObject3D? 
@@ -25,15 +28,16 @@ export default function TopBarButtonsAndPanels( p ) {
                                 setCurrentObject3D={p.setCurrentObject3D} getCurrentPanoramaParams={p.getCurrentPanoramaParams} /> : null }
         
 
+                <Button className="btn btn-danger btn-sm" onClick={ (e) => { localStorage.removeItem('pl.o'); p.restartViewer(); }  }>
+                    Undo changes
+                </Button>
         { p.plOptions && p.editParams.isExpertMode ? 
             <React.Fragment>
 
                 <Button className="btn-sm" onClick={ e => p.restartViewer() }>
                     Restart <span className="badge">{p.countRestarts}</span>
                 </Button>        
-                <Button className="btn btn-danger btn-sm" onClick={ (e) => { localStorage.setItem('pl.o', null); p.restartViewer(); }  }>
-                    Clear cache
-                </Button>
+                
             </React.Fragment>
              : null }
         { p.editParams.isExpertMode ? 
@@ -62,15 +66,16 @@ export default function TopBarButtonsAndPanels( p ) {
 
 
         {/* Button to set current view a default view of the pano */}
-        <Button variant="primary" className='ml-5' onClick={ (e)=> {                 
+        <Button variant="primary" className='ml-5 set-camera-view' onClick={ (e)=> {                 
                 const currentPanoParams =  p.getCurrentPanoramaParams();
                 currentPanoParams.initialLookAt = window.pl.getCameraDirection('lookatPoint');
                 currentPanoParams.initialFov = window.pl.viewer.camera.fov;
                 const newOptions = p.plOptionsReplaceWorldParams(currentPanoParams);
                 SyncPlOptions__LocalStorage(newOptions, p.setPlOptions);
+                localStorage.setItem('lastCameraLookat', window.pl.getCameraDirection('lookatPoint'));
+                // alert('Initial View of panorama set to current view 👍🏽');
             } }>
             Set camera view
         </Button>
-
     </Row>)
 }

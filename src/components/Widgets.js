@@ -3,9 +3,13 @@ import {useEffect, useState} from 'react';
 
 function Widgets( p ) {
 
+    const msgMaxObjects = `You can't create more elements. Upgrade the plugin for infinite posters.`;
+
     const v = window.pl?.viewer;
-    if (window.pl?.el)
-        window.pl.el.querySelector('div:last-child').classList.add('pl-widgets');
+    if (window.pl?.el) {
+        const widgetsContainer = window.pl.el.querySelector('div:last-child');
+        if (widgetsContainer) widgetsContainer.classList.add('pl-widgets');
+    }
 
     const [isWidgetsInit, setIsWidgetsInit ] = useState(false);
     const initWidgets = function() {
@@ -29,6 +33,11 @@ function Widgets( p ) {
                         float: 'left'
                     },    
                     onTap: () => { 
+                        const numObjects = window.pl.viewer.panorama.children.length;
+                        if (p.editParams.MAX_OBJECTS_PER_PANO <= (numObjects-1) ) {
+                            alert(msgMaxObjects);
+                            return;
+                        }
                         const { newObj, objectData } = initNewObject( type );
                         console.log('Created new obj: ', { newObj, objectData })
                     },
@@ -56,7 +65,7 @@ function Widgets( p ) {
     const initNewObject = function(type = 'poster3d') {
         // get Scene by name:
         const params = {
-            name:  `new_${type}_` + Math.floor(Math.random() * 10000),
+            name:  window.newName?? `new_${type}_` + Math.floor(Math.random() * 10000),
             type: type,
             pos: Object.values(v.camera.getWorldDirection(new window.THREE.Vector3()).multiplyScalar(300)), // this normalizes but not to unitary, but to 300 long
         }

@@ -66,14 +66,23 @@ function InputOnClickOption( p ) {
                     p.onClickOption === 'pano' ? 
                         <InputData  input={ { option: 'link', type: 'select', options: panoList, label:'PANORAMA', deleteIfValue: '', active: [ 'pl_poster3d', 'pl_text-2d', 'pl_text-3d'] } } 
                                     currentObject3D={p.currentObject3D}
-                                    getOptionsByObject3D={p.getOptionsByObject3D} />
+                                    getOptionsByObject3D={p.getOptionsByObject3D}
+                                    getCurrentPanoramaParams={p.getCurrentPanoramaParams} 
+                                    plOptionsReplaceWorldParamsHotspot={p.plOptionsReplaceWorldParamsHotspot} 
+                                    setPlOptions={p.setPlOptions}  selectObject={p.selectObject} 
+                                    setCurrentObject3D={p.setCurrentObject3D}
+                                    />
                                     : null}
 
                     { /** LINK TO URL */ 
                     p.onClickOption === 'url' ? <div>
                             <InputData  input={ { option: 'link', type: 'input',  label:'url', deleteIfValue: '', active: [ 'pl_poster3d', 'pl_text-2d', 'pl_text-3d'] } } 
                                     currentObject3D={p.currentObject3D}
-                                    getOptionsByObject3D={p.getOptionsByObject3D} />
+                                    getOptionsByObject3D={p.getOptionsByObject3D}
+                                    getCurrentPanoramaParams={p.getCurrentPanoramaParams} 
+                                    plOptionsReplaceWorldParamsHotspot={p.plOptionsReplaceWorldParamsHotspot} 
+                                    setPlOptions={p.setPlOptions}  selectObject={p.selectObject} 
+                                    setCurrentObject3D={p.setCurrentObject3D} />
                         </div> : null 
                     }
 
@@ -81,7 +90,11 @@ function InputOnClickOption( p ) {
                     p.onClickOption === 'iframe' ? <div>
                     <InputData  input={ { option: 'modal', type: 'input', label:'iframe url', deleteIfValue: '', active: [ 'pl_poster3d', 'pl_text-2d', 'pl_text-3d'] } } 
                             currentObject3D={p.currentObject3D}
-                            getOptionsByObject3D={p.getOptionsByObject3D} />
+                            getOptionsByObject3D={p.getOptionsByObject3D}
+                            getCurrentPanoramaParams={p.getCurrentPanoramaParams} 
+                                    plOptionsReplaceWorldParamsHotspot={p.plOptionsReplaceWorldParamsHotspot} 
+                                    setPlOptions={p.setPlOptions}  selectObject={p.selectObject} 
+                                    setCurrentObject3D={p.setCurrentObject3D} />
                         </div> : null 
                     }
 
@@ -89,7 +102,11 @@ function InputOnClickOption( p ) {
                     p.onClickOption === 'card' ? <div>
                     <InputData  input={ { option: 'modal', type: 'select', options: cardList, label:'Modal Card', deleteIfValue: '', active: [ 'pl_poster3d', 'pl_text-2d', 'pl_text-3d'] } } 
                             currentObject3D={p.currentObject3D}
-                            getOptionsByObject3D={p.getOptionsByObject3D} />
+                            getOptionsByObject3D={p.getOptionsByObject3D}
+                            getCurrentPanoramaParams={p.getCurrentPanoramaParams} 
+                                    plOptionsReplaceWorldParamsHotspot={p.plOptionsReplaceWorldParamsHotspot} 
+                                    setPlOptions={p.setPlOptions}  selectObject={p.selectObject} 
+                                    setCurrentObject3D={p.setCurrentObject3D} />
                         </div> : null 
                     }
                      

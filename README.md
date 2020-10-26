@@ -23,13 +23,16 @@ from outside to this app:
     - window.plImgPath
     - window.basePath
     - window.onSavePlOptionsCallback(plOpts) <== We can use this fn to export the value of the posterlens options js object
+    - window.cardListCallback
+    - window.openModalCallback 
+    - window.defaultPosterImg : url that, if set, is used when creating a new Object
 
 # Communication this react app ===> outside  
 === 
 - using localStorage
-    - `pl.o` <-- THE MOST IMPORTANT: this is what we export.
+    - localStorage.getItem(`pl.o`) <-- THE MOST IMPORTANT: this is what we export.
 - using window vars
-    - window.pl : 
+    - window.pl : The whole posterlens instance (the most userful are `window.pl.viewer` and `window.pl.o`)
     - window.lastSelectedObj : 
 
 

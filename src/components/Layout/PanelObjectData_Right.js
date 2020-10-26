@@ -10,6 +10,7 @@ export default function PanelObjectData_Right( p ) {
     function currentObjectOptions() {
         if (!p.currentObject3D) return;
         const worldParams = p.getCurrentPanoramaParams();
+        if (!worldParams) return;
         let objectOptions = worldParams.hotspots.find( ht => ht.name === p.currentObject3D?.name );
         return objectOptions;
     }

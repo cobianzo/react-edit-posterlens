@@ -5,20 +5,21 @@ import EditObjectControls_Bottom from './Layout/EditObjectControls_Bottom';
 import TopBarButtonsAndPanels from './Layout/TopBarButtonsAndPanels';
 import CanvasUI3D from './Layout/CanvasUI3D';
 import Widgets from './Widgets';
+import { validateCode } from '../helpers';
 
 import { SyncObject3d__Inputs, SyncPlOptions__LocalStorage} from './SyncDataAlongApp'
-import { z_move } from './Layout/CanvasUI3D';
 
 // Bootstrap 4
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 
-export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
+export default function AppEditPosterlens( { data, setAppMode, appAsWidget, codeValidation } ) {
   
   // React states and refs
   const [plOptions, setPlOptions] = useState(); // IMPORTANT. The goal of all this app is to generate these options. With them we can call posterlens to createa  tour.
   const [currentObject3D, setCurrentObject3D] = useState(null); // The current THREEjs selected object. Sometimes we use pl.lastSelectedObj, because there are events outside REACT that can't use the State
   const [isEditMode, setIsEditMode] = useState(false); // In this app, it's always true
+  const [initialDataBackup, setInitialDataBackup] = useState(false); // Used for the button Undo changes. Set the plOptions to this backuped initial value.
   
   const [editParams, setEditParams] = useState( {
     POSTERLENS_CONTAINER_ID: 'posterlens-container', // the div id where we load posterlens
@@ -26,6 +27,8 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
     ROTATE_DEG : 0.05,                                // radians. 3.1416 is 180 deg.
     currentMouse3DPosition: [0,0,0],                  // shown in left panel PanoInfo.js
     AUTO_START_EDIT_MODE : 1,
+    codeValidated: validateCode(codeValidation),
+    MAX_OBJECTS_PER_PANO: validateCode(codeValidation)? 1000 : 3,                          // To make the plugin PRO later.
     isExpertMode: (typeof window.expertMode !== 'undefined')? window.expertMode : true  // shows more or less info.
   } );
   const [countRestarts, setCountRestarts] = useState(0); // not important
@@ -71,7 +74,6 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
     setTimeout(()=> {
       currentObject3D.material.blending = originalBlend;
       currentObject3D.material.color = originalColor;
-      currentObject3D.material.wireframe = false;
     }, 800 );
   }, [currentObject3D])
   
@@ -84,16 +86,21 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
 
     var posterlensConfig = {}
     if (!data) console.log('data variable not found.')
-    else posterlensConfig = data; // `data` is loaded with external file tat sets up `var data = {..}`
+    else posterlensConfig = {... data } ; // `data` is loaded with external file tat sets up `var data = {..}`
     
+    if (!initialDataBackup) { // only when the app is loaded. Fro mhere, if the viewer is reset, we will not enter here.
+      setInitialDataBackup( JSON.stringify(data) );
+    } else posterlensConfig = JSON.parse(initialDataBackup);
+
     // load from cache by default
-    var retrievedOptions = JSON.parse( localStorage.getItem('pl.o') ); //retrieve the object to load cache
+     var retrievedOptions = JSON.parse( localStorage.getItem('pl.o') ); //retrieve the object to load cache
+
     posterlensConfig = (retrievedOptions?.worlds) ? retrievedOptions : posterlensConfig;
     if (!posterlensConfig) {
       console.error('No data loaded. Cant initialize');
       return;
     } 
-    
+
     window.plEditMode = true; // this avoid animations while editing the pano
 
     // CALL POSTERLENS
@@ -121,10 +128,13 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
   }, [isEditMode]);
   
   function restartViewer() {
+    alert('restarting viewer');
+    console.log('plOptions', plOptions);
     destroyViewer();
     setPlOptions(null);
     setIsEditMode(false);
     localStorage.setItem('lastCameraLookat', window.pl.getCameraDirection('lookatPoint'));
+    localStorage.setItem('currentPano', window.pl.viewer.panorama.name );
     delete(window.pl);
     createViewer();
     setCountRestarts(countRestarts + 1);
@@ -137,6 +147,10 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
       lastCameraLookat = lastCameraLookat.map( i => parseInt(i) ); // needed
       window.pl.viewer.setControlCenter(new window.THREE.Vector3( ...lastCameraLookat ));
       localStorage.removeItem("lastCameraLookat"); 
+      const lastPanoSelected = localStorage.getItem('currentPano');
+      if (lastPanoSelected) {
+        window.pl.changePano(lastPanoSelected);
+      }
     }, 500);
     
   }
@@ -144,6 +158,7 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
   // helpers
   function getOptionsByObject3D(object3D, option = null) {
     const currentWorldOptions = getCurrentPanoramaParams();
+    if (!currentWorldOptions) return;
     let objectData = currentWorldOptions.hotspots.find( ht => ht.name === object3D?.name );
     if (objectData && option) return objectData[option];
     return objectData;
@@ -176,7 +191,10 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
   function selectObject(theObj) {
     if (!theObj) return false;      // if (currentObject3D) currentObject3D.material.blending = 1;
     window.lastSelectedObj = theObj;
+    window.lastSelectedObj.lastPosition = window.lastSelectedObj.position.clone();
+    window.lastSelectedObj.lastRotation = window.lastSelectedObj.rotation.clone();
     setCurrentObject3D( theObj );   // look at the object, I dont know how to do it
+    // now also see the WATCH (useEffect for currentObject3D )
   }
 
   // remove from data and in viewer
@@ -239,7 +257,9 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
 
 
   return (     
-    <Container className={ 'wrapper border pt-2' + (editParams.isExpertMode? ' expert-mode' : ' no-expert-mode') } style={{ maxWidth:'1200px' }}>
+    <Container className={ 'posterlens-wrapper border pt-2' 
+                      + ( editParams.codeValidated? ' validated ' : ''  )
+                      + (editParams.isExpertMode? ' expert-mode' : ' no-expert-mode') } >
       
       <TopBarButtonsAndPanels data={data} currentObject3D={currentObject3D} setCurrentObject3D={setCurrentObject3D} getCurrentPanoramaParams={getCurrentPanoramaParams} 
                               plOptions={plOptions} setPlOptions={setPlOptions} editParams={editParams} selectObject={selectObject}
@@ -267,11 +287,11 @@ export default function AppEditPosterlens( { data, setAppMode, appAsWidget } ) {
       : null }
 
       { isEditMode? <Widgets plOptions={plOptions} isEditMode={isEditMode} setIsEditMode={setIsEditMode}  
-                              setCurrentObject3D={setCurrentObject3D} plOptions={plOptions}
+                              setCurrentObject3D={setCurrentObject3D} plOptions={plOptions} 
                               key={countRestarts} restartViewer={restartViewer} selectObject={selectObject}
                               plOptionsReplaceWorldParams={plOptionsReplaceWorldParams}
                               getCurrentPanoramaParams={getCurrentPanoramaParams} setPlOptions={setPlOptions}
-                              
+                              editParams={editParams}
                               
                               /> : null }
     </Container>)

@@ -39,7 +39,7 @@ function EditObjectControls_Bottom( p ) {
             
             if (window.lastSelectedObj.material.type === "SpriteMaterial") {
                 // for a sptrite some actions break it.
-                if (!['4','5','+','-'].includes(event.key)) return
+                if (!['4','5','+','-','q'].includes(event.key)) return
             }
             switch (event.key) {
                 case '+': window.lastSelectedObj.scale.set( window.lastSelectedObj.scale.x * SCALE_FACTOR, window.lastSelectedObj.scale.y * SCALE_FACTOR, window.lastSelectedObj.scale.z * SCALE_FACTOR );      break;
@@ -56,8 +56,28 @@ function EditObjectControls_Bottom( p ) {
                 case 's': case 'S': window.lastSelectedObj.translateY( -MOVE );  break;
                 case 'd': case 'D': window.lastSelectedObj.translateX( MOVE );  break;
                 case 'a': case 'A': window.lastSelectedObj.translateX( -MOVE );  break;
-                default:
-                    break;
+
+                case 'q': // locking element.
+                const newIsLocked = window.objectLocked? false : true; // swap 
+                if (newIsLocked) {
+                    window.lastSelectedObj.originalColor = newIsLocked? window.lastSelectedObj.material.color : null;
+                    window.lastSelectedObj.material.color = { r:1, g:0, b:0};
+                    window.pl.el.classList.add('locked-element');
+                    window.objectLocked = window.lastSelectedObj;
+                } else {
+                    window.objectLocked.material.color = window.objectLocked.originalColor;
+                    window.pl.el.classList.remove('locked-element');
+                    window.objectLocked = null;
+                }                    
+                break;
+                case 'z': // undo displacement
+                    if (window.lastSelectedObj.lastPosition) 
+                        window.lastSelectedObj.position.set(... Object.values(window.lastSelectedObj.lastPosition) );
+                    if (window.lastSelectedObj.lastRotation) 
+                        window.lastSelectedObj.rotation.set(... Object.values(window.lastSelectedObj.lastRotation) );
+                    
+                    window.lastSelectedObj.lastPosition = window.lastSelectedObj.lastRotation = null;
+                break;
             }
             p.setCurrentObject3D(window.lastSelectedObj);
             if (window.waitSave) 

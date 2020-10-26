@@ -5,7 +5,7 @@ import InputGroup from 'react-bootstrap/InputGroup';
 
 /**
  * Input "Select image" that sets the option p.input.option to that image.
- * Allows 
+ * it's hidden in the plugin of WP, but we call the OnClick with JS. 
  * */
 function InputImage( p ) {
 
@@ -49,6 +49,7 @@ function InputImage( p ) {
     
 
     function handlePickImage(event) {
+        // Convention with external code (outside this app): <li class="pl_selected_image" data-url="https://...image.jpg">
         // optionally we can interact from outside react with tthe selection. If we have set an element with class 'pl_selected_image', we'll grab that img.
         if (document.querySelector('.pl_selected_image')) {
             const selected_img = document.querySelector('.pl_selected_image');

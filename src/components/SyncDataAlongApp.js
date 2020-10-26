@@ -12,7 +12,7 @@ import { round2 } from '../helpers'
   // updates plOptions (the js object with all the config to load posterlens).
   // updates the react state and the localstorage (it can be used outside of react). It also uses a callback that can be used outside react.
   export function SyncPlOptions__LocalStorage(plOptions, setPlOptions) {
-    setPlOptions(plOptions);
+    setPlOptions({ ... plOptions } );
     var exportStr = JSON.stringify(plOptions, false, 2);
     localStorage.setItem('pl.o', exportStr);
     if (window.onSavePlOptionsCallback) window.onSavePlOptionsCallback(plOptions); // this fn is passed from outside react, and it can be useful

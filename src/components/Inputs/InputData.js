@@ -28,6 +28,7 @@ export default function InputData(p) {
         if ( p.input.option === 'sprite' && theValue === true ) fieldPair.scale = p.currentObject3D.scale.x * 10; // if we convert into sprite we better scale or it will look tiny
         if ( p.input.option === 'sprite' && !theValue ) fieldPair.scale = p.currentObject3D.scale.x / 10; // the other way as well.
         let regenerate = ['name'].includes(p.input.option)? false : true; // regenerate bu default , except in some, like 'name'
+        console.log(syncParams)
         SyncInputFieldset__DataHotspot( p.currentObject3D.name, fieldPair, regenerate, syncParams);
         setInfoMsg('Applied!');  setTimeout(()=>setInfoMsg(''), 1000);
         p.selectObject(window.lastSelectedObj);

@@ -1,3 +1,15 @@
+/* Parent container */
+.posterlens-wrapper {
+    max-width: 1200px;
+}
+.posterlens-wrapper.validated {
+    background:  rgba(250, 150, 0, 0.404);
+}
+
+/* Canvas UI */
+.posterlens-container.locked-element {
+    border: 2px solid salmon;
+}
 /* ObjectInfo.js */
 .object-info {
     background: rgba(250,250,0,0.6);

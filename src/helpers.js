@@ -1,3 +1,5 @@
+import CryptoJS from "react-native-crypto-js";
+
 export function round2(fl) { 
     var numb = fl;
     if (typeof numb === 'number')
@@ -29,4 +31,7 @@ export function reactGetMouse3Dposition(event, p ) {
         i++;
     }
   }
-  
+
+  export function validateCode(code) {
+    return ['8a4a13b6c7ea2066b0aa6d72dd76c8e4'].includes(CryptoJS.MD5(code).toString());
+  }

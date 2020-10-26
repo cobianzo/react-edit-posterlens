@@ -26,6 +26,14 @@ export function z_move(object3D, direction = 'close'){
  */
 function CanvasUI3D( p ) {
 
+  function placeObjectOnMouse(event, theObj){
+      if (!theObj) return;
+      let newPos = reactGetMouse3Dposition(event, { setEditParams: p.setEditParams, editParams: p.editParams })
+      if (!newPos) return;
+      const v = new window.THREE.Vector3(...newPos).normalize().multiplyScalar(theObj.distance);
+      window.pl.setObjectPos(theObj, [v.x, v.y, v.z]);
+  }
+
   // triggered on load, only once.
   useEffect(() => { 
     if (!window.pl) return;
@@ -33,31 +41,34 @@ function CanvasUI3D( p ) {
     const v = window.pl.viewer;
     v.renderer.domElement.addEventListener('mousedown', (event) => { handlerPickupObject(event) });
 
+    
     // --- move object 
     v.renderer.domElement.addEventListener('mousemove', function (event) {
-        if (!window.selectedObj) return;
-        let newPos = reactGetMouse3Dposition(event, { setEditParams: p.setEditParams, editParams: p.editParams })
-        if (!newPos) return;
-        const v = new window.THREE.Vector3(...newPos).normalize().multiplyScalar(window.selectedObj.distance);
-        newPos = [v.x, v.y, v.z];
-        window.pl.setObjectPos(window.selectedObj, newPos);
+      placeObjectOnMouse(event, window.selectedObj)
     });
     v.renderer.domElement.addEventListener('mouseup', (event) => { handlerDropObject(event) });
     // document.addEventListener('keydown', (event) => { handlerScaleRotateObject(event) } );
-      
+    
+    // double click places the last obj where clicked. Useful when we lock objects.
+    v.renderer.domElement.addEventListener('dblclick', function (event) {
+      if (window.lastSelectedObj)
+        placeObjectOnMouse(event, window.lastSelectedObj);
+    });
+
   }, [p.plOptions] );
 
   // --- pickup object 
   const handlerPickupObject = (event) => {
       if ( !p.isEditMode ) return;
-      if (window.pl.shiftIsPressed) return;
+      if (window.pl.shiftIsPressed) return;      
 
       const v = window.pl.viewer;
       
       const intersects = v.raycaster.intersectObject( v.panorama, true );
       const theObj = intersects[0]? intersects[0].object : null ;
       if (!theObj || !theObj.type?.startsWith('pl_')) return;
-      if (theObj.isLocked) return; 
+      if (theObj.isBlocked) return;  // blocked object: that obj can't be selected
+      if (window.objectLocked && window.objectLocked !== theObj) return; // locking an object (ctr+q). Only that object can be selected
 
       theObj.distance = v.camera.position.distanceTo(theObj.position);
       window.selectedObj = theObj;
